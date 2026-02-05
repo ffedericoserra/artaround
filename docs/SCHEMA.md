@@ -6,7 +6,7 @@
 
 | Environment | Database | User | Host |
 |-------------|----------|------|------|
-| Development | `artaround` | - | `localhost:27017` |
+| Development | `artaround` | `REMOVED` | `localhost:27017` |
 | Production | `REMOVED` | `REMOVED` | `mongodb` |
 
 ## Data Models
