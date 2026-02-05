@@ -6,8 +6,8 @@
 
 | Environment | Database | User | Host |
 |-------------|----------|------|------|
+| Production | `artaround` | `REMOVED` | `?? (localhost:27017 from inside node container?)` |
 | Development | `artaround` | `REMOVED` | `localhost:27017` |
-| Production | `REMOVED` | `REMOVED` | `mongodb` |
 
 ## Data Models
 
