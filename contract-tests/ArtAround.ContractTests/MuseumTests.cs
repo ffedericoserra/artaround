@@ -157,12 +157,14 @@ public class MuseumTests(SeededMuseumFixture fixture) : IClassFixture<SeededMuse
         Assert.True(artists.GetArrayLength() < all.GetArrayLength());
     }
 
-    // type is an enum matched exactly: a wrong case, an unknown value or an empty value is a client error.
-    // Only the status is asserted: the 400 body shape changes to ProblemDetails in Stage 6.
+    // type is a single enum value matched exactly: a wrong case, an unknown value, an empty value or a
+    // repeated type is a client error. Only the status is asserted: the 400 body shape changes to
+    // ProblemDetails in Stage 6.
     [Theory]
     [InlineData("artist")]
     [InlineData("Bogus")]
     [InlineData("")]
+    [InlineData("Artist&type=Place")]
     public async Task GetContents_InvalidType_Returns400(string type)
     {
         using var response = await Api.SendAsync(HttpMethod.Get, $"{MuseumsApi}/{SeededMuseumFixture.Slug}/contents?type={type}");

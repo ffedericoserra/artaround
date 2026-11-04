@@ -29,12 +29,15 @@ public class MuseumsController(IMuseumRepository repo) : ControllerBase
     }
 
     [HttpGet("{idOrSlug}/contents")]
-    public async Task<IActionResult> GetContents(string idOrSlug, string? type)
+    public async Task<IActionResult> GetContents(string idOrSlug)
     {
+        // Read the raw values: ?type= gives [""], a repeated type gives two values, no type gives none.
+        var values = Request.Query["type"];
         ContentType? filter = null;
-        if (Request.Query.ContainsKey("type"))
+        if (values.Count > 0)
         {
-            if (type is null || !Enum.GetNames<ContentType>().Contains(type))
+            var type = values[0];
+            if (values.Count > 1 || type is null || !Enum.GetNames<ContentType>().Contains(type))
             {
                 return BadRequest(new { error = "Invalid content type" });
             }
