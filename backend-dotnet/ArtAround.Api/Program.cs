@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql.NameTranslation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using ArtAround.Api.Dtos;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -18,10 +22,25 @@ builder.Services.AddOptions<JwtOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-builder.Services.AddControllers();
+// Deny by default: every action needs a valid token unless it says [AllowAnonymous].
+builder.Services.AddControllers(options => options.Filters.Add(new AuthorizeFilter()))
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Missing fields and malformed JSON never reach the action: give them the contract's 400 body.
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var details = context.ModelState
+                .Where(entry => entry.Value!.Errors.Count > 0)
+                .Select(entry => new FieldError(
+                    JsonNamingPolicy.CamelCase.ConvertName(entry.Key.Replace("$.", "")),
+                    entry.Value!.Errors[0].ErrorMessage))
+                .ToList();
+            return new BadRequestObjectResult(new ValidationErrorResponse(details));
+        };
+    });
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IMuseumRepository, EfMuseumRepository>();
-builder.Services.AddProblemDetails();   
+builder.Services.AddProblemDetails();
 var contentTypeTranslator = new NpgsqlNullNameTranslator();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default"), npgsql => npgsql
@@ -51,7 +70,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment()) { app.MapOpenApi(); }
 app.UseExceptionHandler();
-app.UseStatusCodePages();  
+app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -103,6 +103,22 @@ public class AuthTests(RegisteredUserFixture user) : IClassFixture<RegisteredUse
             await unknownUser.Content.ReadAsStringAsync());
     }
 
+    [Fact]
+    public async Task Login_EmptyPassword_Returns400()
+    {
+        using var response = await AttemptLoginAsync(user.Username, "");
+
+        await AssertValidationErrorAsync(response, "password");
+    }
+
+    [Fact]
+    public async Task Login_MissingUsername_Returns400()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Post, LoginApi, body: new { password = TestPassword });
+
+        await AssertValidationErrorAsync(response, "username");
+    }
+
     /* ---------- /me ---------- */
 
     [Fact]
@@ -183,6 +199,31 @@ public class AuthTests(RegisteredUserFixture user) : IClassFixture<RegisteredUse
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var body = await Api.ReadJsonAsync(response);
         Assert.Equal("Validation Error", body.GetProperty("error").GetString());
+    }
+
+    [Fact]
+    public async Task Register_InvalidEmail_Returns400()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Post, RegisterApi, body: new
+        {
+            username = UniqueUsername(12),
+            password = TestPassword,
+            email = "not-an-email",
+        });
+
+        await AssertValidationErrorAsync(response, "email");
+    }
+
+    [Fact]
+    public async Task Register_MissingPassword_Returns400()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Post, RegisterApi, body: new
+        {
+            username = UniqueUsername(12),
+            email = $"{UnknownUsername()}@test.local",
+        });
+
+        await AssertValidationErrorAsync(response, "password");
     }
 
     [Theory]

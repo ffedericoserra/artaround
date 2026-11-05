@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ArtAround.Api.Repositories;
 using ArtAround.Api.Dtos;
@@ -5,6 +6,7 @@ using ArtAround.Api.Domain;
 
 namespace ArtAround.Api.Controllers;
 
+[AllowAnonymous]
 [ApiController]
 [Route("api/museums")]
 public class MuseumsController(IMuseumRepository repo) : ControllerBase

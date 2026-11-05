@@ -18,9 +18,16 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
 {
     private const string InvalidCredentials = "Invalid credentials";
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
+        var errors = request.Validate();
+        if (errors.Count > 0)
+        {
+            return BadRequest(new ValidationErrorResponse(errors));
+        }
+
         var user = new User
         {
             Username = request.Username.Trim(),
@@ -41,9 +48,16 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         return StatusCode(StatusCodes.Status201Created, new { user = UserDto.From(user), token = tokens.CreateToken(user) });
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
+        var errors = request.Validate();
+        if (errors.Count > 0)
+        {
+            return BadRequest(new ValidationErrorResponse(errors));
+        }
+
         var login = request.Username.Trim().ToLowerInvariant();
         var user = await db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == login || u.Email.ToLower() == login);
         if (user is null)
@@ -67,7 +81,6 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         return Ok(new { user = UserDto.From(user), token = tokens.CreateToken(user) });
     }
 
-    [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
