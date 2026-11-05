@@ -22,6 +22,7 @@ namespace ArtAround.Api.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "content_type", new[] { "Artist", "Artwork", "Movement", "Place" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "language", new[] { "en", "it" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "poi_type", new[] { "bar", "entrance", "exit", "shop", "stairs", "toilet" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -275,6 +276,72 @@ namespace ArtAround.Api.Data.Migrations
                             t.HasCheckConstraint("points_of_interest_lat_range", "lat BETWEEN -90 AND 90");
 
                             t.HasCheckConstraint("points_of_interest_lng_range", "lng BETWEEN -180 AND 180");
+                        });
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("avatar_url");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<Language>("Language")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("language")
+                        .HasDefaultValue(Language.It)
+                        .HasColumnName("language");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("password_hash");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("username");
+
+                    b.Property<int>("WalletBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(100)
+                        .HasColumnName("wallet_balance");
+
+                    b.HasKey("Id")
+                        .HasName("pk_users");
+
+                    b.ToTable("users", null, t =>
+                        {
+                            t.HasCheckConstraint("users_username_min_len", "char_length(username) >= 3");
+
+                            t.HasCheckConstraint("users_username_trimmed", "username = btrim(username)");
+
+                            t.HasCheckConstraint("users_wallet_nonnegative", "wallet_balance >= 0");
                         });
                 });
 
