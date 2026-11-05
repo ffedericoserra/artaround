@@ -4,7 +4,7 @@ public class PointOfInterest
 {
     public long Id { get; set; }
     public long MuseumId { get; set; }
-    public string Type { get; set; } = "";   // becomes an enum later
+    public PoiType Type { get; set; }
     public string Label { get; set; } = "";
     public double Lat { get; set; }
     public double Lng { get; set; }

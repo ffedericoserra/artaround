@@ -38,5 +38,20 @@ services:
       JWT_EXPIRES_IN: 1d    
     command: sh -c "npm install && npm start"
 
+  # 3. Postgres for the .NET backend (5432 and 5433 are taken by other containers)
+  postgres_db:
+    image: postgres:17
+    container_name: artaround-dev-db
+    restart: always
+    environment:
+      POSTGRES_USER: artaround
+      POSTGRES_PASSWORD: artaround
+      POSTGRES_DB: artaround
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   mongo_data:
+  postgres_data:

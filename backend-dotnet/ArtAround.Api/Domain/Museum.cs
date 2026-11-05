@@ -16,4 +16,5 @@ public class Museum
 
     public List<FloorPlan> FloorPlans { get; set; } = [];
     public List<PointOfInterest> PointsOfInterest { get; set; } = [];
+    public List<Content> Contents { get; set; } = [];
 }
