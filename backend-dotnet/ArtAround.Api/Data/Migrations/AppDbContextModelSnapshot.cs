@@ -432,6 +432,265 @@ namespace ArtAround.Api.Data.Migrations
                     b.ToTable("saved_visits", (string)null);
                 });
 
+            modelBuilder.Entity("ArtAround.Api.Domain.SectionResponse", b =>
+                {
+                    b.Property<long>("SessionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("session_id");
+
+                    b.Property<long>("QuestionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("question_id");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.Property<AnswerType>("AnswerType")
+                        .HasColumnType("answer_type")
+                        .HasColumnName("answer_type");
+
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_correct");
+
+                    b.Property<long>("SectionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("section_id");
+
+                    b.Property<int?>("SelectedIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("selected_index");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("Text")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("text");
+
+                    b.HasKey("SessionId", "QuestionId", "UserId")
+                        .HasName("pk_section_responses");
+
+                    b.HasIndex("QuestionId")
+                        .HasDatabaseName("ix_section_responses_question_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_section_responses_user_id");
+
+                    b.ToTable("section_responses", (string)null);
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.Session", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<int>("CurrentItemIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_item_index");
+
+                    b.Property<int>("CurrentStepIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_step_index");
+
+                    b.Property<DateTimeOffset?>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<long>("OwnerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("owner_id");
+
+                    b.Property<bool>("QuizStarted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("quiz_started");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<long>("VisitId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("visit_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sessions");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_sessions_code")
+                        .HasFilter("is_active");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_sessions_owner_id");
+
+                    b.HasIndex("VisitId")
+                        .HasDatabaseName("ix_sessions_visit_id");
+
+                    b.ToTable("sessions", (string)null);
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionActivity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("action");
+
+                    b.Property<long>("SessionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("session_id");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_session_activities");
+
+                    b.HasIndex("SessionId")
+                        .HasDatabaseName("ix_session_activities_session_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_session_activities_user_id");
+
+                    b.ToTable("session_activities", (string)null);
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("SessionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("session_id");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("text");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_session_messages");
+
+                    b.HasIndex("SessionId")
+                        .HasDatabaseName("ix_session_messages_session_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_session_messages_user_id");
+
+                    b.ToTable("session_messages", (string)null);
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionParticipant", b =>
+                {
+                    b.Property<long>("SessionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("session_id");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<int?>("QuizScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("quiz_score");
+
+                    b.HasKey("SessionId", "UserId")
+                        .HasName("pk_session_participants");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_session_participants_user_id");
+
+                    b.ToTable("session_participants", (string)null);
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionQuizAnswer", b =>
+                {
+                    b.Property<long>("SessionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("session_id");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("QuestionIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("question_index");
+
+                    b.Property<int>("SelectedIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("selected_index");
+
+                    b.HasKey("SessionId", "UserId", "QuestionIndex")
+                        .HasName("pk_session_quiz_answers");
+
+                    b.ToTable("session_quiz_answers", (string)null);
+                });
+
             modelBuilder.Entity("ArtAround.Api.Domain.User", b =>
                 {
                     b.Property<long>("Id")
@@ -870,6 +1129,120 @@ namespace ArtAround.Api.Data.Migrations
                     b.Navigation("Visit");
                 });
 
+            modelBuilder.Entity("ArtAround.Api.Domain.SectionResponse", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.VisitBlockQuestion", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_section_responses_visit_block_question_question_id");
+
+                    b.HasOne("ArtAround.Api.Domain.Session", null)
+                        .WithMany("Responses")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_section_responses_sessions_session_id");
+
+                    b.HasOne("ArtAround.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_section_responses_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.Session", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_sessions_users_owner_id");
+
+                    b.HasOne("ArtAround.Api.Domain.Visit", "Visit")
+                        .WithMany()
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sessions_visits_visit_id");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Visit");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionActivity", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.Session", null)
+                        .WithMany("Activities")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_activities_sessions_session_id");
+
+                    b.HasOne("ArtAround.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_activities_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionMessage", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.Session", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_messages_sessions_session_id");
+
+                    b.HasOne("ArtAround.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_messages_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionParticipant", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.Session", null)
+                        .WithMany("Participants")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_participants_sessions_session_id");
+
+                    b.HasOne("ArtAround.Api.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_participants_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionQuizAnswer", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.SessionParticipant", null)
+                        .WithMany("QuizAnswers")
+                        .HasForeignKey("SessionId", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_session_quiz_answers_session_participants_session_id_user_id");
+                });
+
             modelBuilder.Entity("ArtAround.Api.Domain.Visit", b =>
                 {
                     b.HasOne("ArtAround.Api.Domain.User", "Creator")
@@ -971,6 +1344,22 @@ namespace ArtAround.Api.Data.Migrations
                     b.Navigation("FloorPlans");
 
                     b.Navigation("PointsOfInterest");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.Session", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("Messages");
+
+                    b.Navigation("Participants");
+
+                    b.Navigation("Responses");
+                });
+
+            modelBuilder.Entity("ArtAround.Api.Domain.SessionParticipant", b =>
+                {
+                    b.Navigation("QuizAnswers");
                 });
 
             modelBuilder.Entity("ArtAround.Api.Domain.Visit", b =>

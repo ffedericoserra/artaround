@@ -10,7 +10,7 @@ internal static class Api
 {
     // One client for the whole run: HttpClient is thread-safe and meant to be reused.
     // Never set DefaultRequestHeaders on it: test classes run in parallel and would overwrite each other.
-    public static readonly HttpClient Client = CreateClient();
+    internal static readonly HttpClient Client = CreateClient();
 
     private static HttpClient CreateClient()
     {

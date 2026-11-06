@@ -12,6 +12,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<Visit> Visits => Set<Visit>();
     public DbSet<SavedVisit> SavedVisits => Set<SavedVisit>();
+    public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<SessionParticipant> SessionParticipants => Set<SessionParticipant>();
+    public DbSet<SessionActivity> SessionActivities => Set<SessionActivity>();
+    public DbSet<SessionMessage> SessionMessages => Set<SessionMessage>();
+    public DbSet<SectionResponse> SectionResponses => Set<SectionResponse>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

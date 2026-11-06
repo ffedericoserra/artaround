@@ -51,7 +51,7 @@ public record VisitSummaryDto(
 {
     public static VisitSummaryDto From(Visit v)
     {
-        var sequence = VisitMapping.Stops(v, i => new StopItemRefDto(i.Id.ToString(), i.Content.UniversalId));
+        var sequence = VisitMapping.Stops(v, stop => new StopItemRefDto(stop.ItemId.ToString(), stop.Item.Content.UniversalId));
         return new(
             v.Id.ToString(), v.Title, v.Slug, v.Description, v.ImageUrl, MuseumRefDto.From(v.Museum), UserRefDto.From(v.Creator),
             sequence, Labels.VisitTypes.Of(v.Type), Labels.VisitLengths.Of(v.Length), v.IsPublic, sequence.Count,
@@ -81,16 +81,10 @@ public record VisitDetailDto(
     public static VisitDetailDto From(Visit v, long? viewerId)
     {
         var showAnswers = v.CreatorId == viewerId;
-        var sequence = VisitMapping.Stops(v, i => ItemDto.From(i, viewerId));
+        var sequence = VisitMapping.Stops(v, stop => ItemDto.From(stop.Item, viewerId));
         return new(
             v.Id.ToString(), v.Title, v.Slug, v.Description, v.ImageUrl, MuseumDto.From(v.Museum), UserRefDto.From(v.Creator),
-            sequence,
-            v.Blocks.OrderBy(b => b.Position).Select(b => new BlockDto(
-                b.Id.ToString(), Labels.BlockTypes.Of(b.Type), b.Name,
-                b.Items.OrderBy(i => i.Position).Select(i => i.ItemId.ToString()).ToList(),
-                b.Questions.OrderBy(q => q.Position).Select(q => new BlockQuestionDto(
-                    q.Id.ToString(), q.Prompt, Labels.AnswerTypes.Of(q.AnswerType), q.Options, showAnswers ? q.CorrectIndex : null)).ToList())).ToList(),
-            v.Quiz.OrderBy(q => q.Position).Select(q => new QuizQuestionDto(q.Question, q.Options, showAnswers ? q.CorrectIndex : null)).ToList(),
+            sequence, VisitMapping.Blocks(v, showAnswers), VisitMapping.Quiz(v, showAnswers),
             Labels.VisitTypes.Of(v.Type), Labels.VisitLengths.Of(v.Length), v.IsPublic, sequence.Count,
             v.CreatedAt, v.UpdatedAt);
     }
@@ -101,11 +95,21 @@ public record VisitWriteResponse(VisitDetailDto Visit, int ChargedAmount, int Wa
 public static class VisitMapping
 {
     /// <summary>The flat sequence is derived: artwork blocks' items, in order.</summary>
-    public static List<StopDto<TItem>> Stops<TItem>(Visit v, Func<Item, TItem> mapItem) =>
+    public static List<StopDto<TItem>> Stops<TItem>(Visit v, Func<VisitBlockItem, TItem> mapItem) =>
         v.Blocks.OrderBy(b => b.Position)
             .SelectMany(b => b.Items.OrderBy(i => i.Position))
-            .Select((stop, order) => new StopDto<TItem>(mapItem(stop.Item), order, stop.NextDirections, stop.PrevDirections, stop.OverrideImage))
+            .Select((stop, order) => new StopDto<TItem>(mapItem(stop), order, stop.NextDirections, stop.PrevDirections, stop.OverrideImage))
             .ToList();
+
+    public static List<BlockDto> Blocks(Visit v, bool showAnswers) =>
+        v.Blocks.OrderBy(b => b.Position).Select(b => new BlockDto(
+            b.Id.ToString(), Labels.BlockTypes.Of(b.Type), b.Name,
+            b.Items.OrderBy(i => i.Position).Select(i => i.ItemId.ToString()).ToList(),
+            b.Questions.OrderBy(q => q.Position).Select(q => new BlockQuestionDto(
+                q.Id.ToString(), q.Prompt, Labels.AnswerTypes.Of(q.AnswerType), q.Options, showAnswers ? q.CorrectIndex : null)).ToList())).ToList();
+
+    public static List<QuizQuestionDto> Quiz(Visit v, bool showAnswers) =>
+        v.Quiz.OrderBy(q => q.Position).Select(q => new QuizQuestionDto(q.Question, q.Options, showAnswers ? q.CorrectIndex : null)).ToList();
 }
 
 public record StopRequest(string? ItemId, string? NextDirections, string? PrevDirections, string? OverrideImage);

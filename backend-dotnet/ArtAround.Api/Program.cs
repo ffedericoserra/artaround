@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using ArtAround.Api.Authorization;
 using ArtAround.Api.Dtos;
+using ArtAround.Api.Hubs;
 using ArtAround.Api.Infrastructure;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -42,6 +43,7 @@ builder.Services.AddControllers(options => options.Filters.Add(new AuthorizeFilt
         };
     });
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
 builder.Services.AddScoped<IMuseumRepository, EfMuseumRepository>();
 // Framework errors (401, 404, 500) carry "error" too: the frontends read it.
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
@@ -76,6 +78,19 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Value.Secret)),
             ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
         };
+
+        // Browsers can't set headers on a WebSocket, so the SignalR client sends the token in the query string.
+        bearer.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = context.Request.Query["access_token"];
+                }
+                return Task.CompletedTask;
+            },
+        };
     });
 builder.Services.AddSingleton<IAuthorizationHandler, OwnerHandler>();
 builder.Services.AddAuthorizationBuilder()
@@ -89,4 +104,5 @@ app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<SessionHub>("/hubs/session");
 app.Run();
