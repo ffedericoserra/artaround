@@ -87,5 +87,5 @@ With the app running on port 8000:
 dotnet test contract-tests/ArtAround.ContractTests
 ```
 
-They exercise the API over real HTTP and SignalR, including concurrent purchases, recharges and saves. CI runs them on every push against the full Docker setup.
+They exercise the API over real HTTP and SignalR, including concurrent purchases, recharges and saves.
 
