@@ -29,16 +29,17 @@ public record ItemDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt)
 {
-    // Purchases arrive in Stage 7: until then nobody has bought anything.
     public static ItemDto From(Item i, long? viewerId)
     {
         var isOwned = i.CreatorId == viewerId;
+        var isPurchased = i.Purchases.Any(p => p.UserId == viewerId);
         return new(
             i.Id.ToString(), i.Content.UniversalId, UserRefDto.From(i.Creator), i.TargetAudience,
             i.Texts.OrderBy(t => t.Tone).Select(t => new ItemTextDto(Labels.Tones.Of(t.Tone), t.Text)).ToList(),
             i.Price, Labels.Licenses.Of(i.License), i.IsPublic,
             i.AssociatedContents.Select(ContentDto.From).ToList(),
-            isOwned, IsPurchased: false, AdoptionPrice: isOwned ? 0 : i.Price, SalesCount: 0, Revenue: isOwned ? 0 : null,
+            isOwned, isPurchased, AdoptionPrice: isOwned || isPurchased ? 0 : i.Price, i.Purchases.Count,
+            Revenue: isOwned ? i.Purchases.Sum(p => p.PricePaid) : null,
             i.CreatedAt, i.UpdatedAt);
     }
 }

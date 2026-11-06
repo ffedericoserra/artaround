@@ -3,6 +3,7 @@ using ArtAround.Api.Data;
 using ArtAround.Api.Domain;
 using ArtAround.Api.Dtos;
 using ArtAround.Api.Infrastructure;
+using ArtAround.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace ArtAround.Api.Controllers;
 
 [ApiController]
 [Route("api/items")]
-public class ItemsController(AppDbContext db, IAuthorizationService authorization) : ControllerBase
+public class ItemsController(AppDbContext db, IAuthorizationService authorization, PurchaseService purchases) : ControllerBase
 {
     private const string NotFoundMessage = "Item not found";
     private const string InvalidId = "Invalid id format";
@@ -45,7 +46,7 @@ public class ItemsController(AppDbContext db, IAuthorizationService authorizatio
         {
             "true" => query.Where(i => i.IsPublic),
             not null => query.Where(i => !i.IsPublic && i.CreatorId == viewerId),
-            null => query.Where(i => i.IsPublic || i.CreatorId == viewerId),
+            null => query.Where(i => i.IsPublic || i.CreatorId == viewerId || i.Purchases.Any(p => p.UserId == viewerId)),
         };
 
         var items = await query.WithDetails().OrderByDescending(i => i.CreatedAt).ThenByDescending(i => i.Id).ToListAsync();
@@ -69,7 +70,7 @@ public class ItemsController(AppDbContext db, IAuthorizationService authorizatio
         }
 
         // A public visit must be able to show the private items it uses.
-        var canRead = item.IsPublic || item.CreatorId == viewerId
+        var canRead = item.IsPublic || item.CreatorId == viewerId || item.Purchases.Any(p => p.UserId == viewerId)
             || await db.Visits.AnyAsync(v => v.IsPublic && v.Blocks.Any(b => b.Items.Any(s => s.ItemId == itemId)));
         return canRead
             ? Ok(new { item = ItemDto.From(item, viewerId) })
@@ -203,10 +204,42 @@ public class ItemsController(AppDbContext db, IAuthorizationService authorizatio
         }
         catch (DbUpdateException e) when (e.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation })
         {
-            return ApiProblem.Conflict("Items used by a visit cannot be deleted");
+            return ApiProblem.Conflict("Items used by a visit or already sold cannot be deleted");
         }
 
         return Ok(new { message = "Item deleted" });
+    }
+
+    [HttpPost("{id}/purchase")]
+    public async Task<IActionResult> Purchase(string id)
+    {
+        if (!long.TryParse(id, out var itemId))
+        {
+            return ApiProblem.BadRequest(InvalidId);
+        }
+
+        var buyerId = User.GetId();
+        var creatorId = await db.Items.Where(i => i.Id == itemId).Select(i => (long?)i.CreatorId).FirstOrDefaultAsync();
+        if (creatorId is null)
+        {
+            return ApiProblem.NotFound(NotFoundMessage);
+        }
+        if (creatorId == buyerId)
+        {
+            return ApiProblem.BadRequest("Creators already own their items");
+        }
+
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var result = await purchases.AdoptAsync(buyerId, [itemId]);
+        await transaction.CommitAsync();
+
+        return Ok(new
+        {
+            message = result.AdoptedItemIds.Count > 0 ? "Item purchased successfully" : "Item already purchased",
+            result.ChargedAmount,
+            result.WalletBalance,
+            result.AdoptedItemIds,
+        });
     }
 
     private async Task<ItemDto> ReadAsync(long id)

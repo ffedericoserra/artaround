@@ -10,7 +10,8 @@ public static class QueryExtensions
         .Include(i => i.Content)
         .Include(i => i.Creator)
         .Include(i => i.Texts)
-        .Include(i => i.AssociatedContents);
+        .Include(i => i.AssociatedContents)
+        .Include(i => i.Purchases);
 
     /// <summary>Visit lists: refs and each stop's content id, no full items.</summary>
     public static IQueryable<Visit> WithSummary(this IQueryable<Visit> visits) => visits
@@ -30,5 +31,6 @@ public static class QueryExtensions
         .Include(v => v.Blocks).ThenInclude(b => b.Items).ThenInclude(i => i.Item).ThenInclude(i => i.Content)
         .Include(v => v.Blocks).ThenInclude(b => b.Items).ThenInclude(i => i.Item).ThenInclude(i => i.Creator)
         .Include(v => v.Blocks).ThenInclude(b => b.Items).ThenInclude(i => i.Item).ThenInclude(i => i.Texts)
-        .Include(v => v.Blocks).ThenInclude(b => b.Items).ThenInclude(i => i.Item).ThenInclude(i => i.AssociatedContents);
+        .Include(v => v.Blocks).ThenInclude(b => b.Items).ThenInclude(i => i.Item).ThenInclude(i => i.AssociatedContents)
+        .Include(v => v.Blocks).ThenInclude(b => b.Items).ThenInclude(i => i.Item).ThenInclude(i => i.Purchases);
 }

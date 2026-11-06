@@ -21,6 +21,7 @@ public class VisitConfiguration : IEntityTypeConfiguration<Visit>
 
         builder.Property(v => v.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(v => v.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+        builder.Property(v => v.Version).IsRowVersion();
         builder.HasOne(v => v.Museum).WithMany().HasForeignKey(v => v.MuseumId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(v => v.Creator).WithMany().HasForeignKey(v => v.CreatorId).OnDelete(DeleteBehavior.NoAction);
         builder.HasMany(v => v.Blocks).WithOne().HasForeignKey(b => b.VisitId).OnDelete(DeleteBehavior.Cascade);

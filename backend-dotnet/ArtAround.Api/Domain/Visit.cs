@@ -15,6 +15,9 @@ public class Visit : IOwned
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
+    /// <summary>Postgres's xmin: SaveChanges fails if the row changed since it was read.</summary>
+    public uint Version { get; set; }
+
     public Museum Museum { get; set; } = null!;
     public User Creator { get; set; } = null!;
     public List<VisitBlock> Blocks { get; set; } = [];

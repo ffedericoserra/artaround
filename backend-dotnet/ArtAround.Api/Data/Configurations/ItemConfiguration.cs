@@ -16,6 +16,7 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
         builder.Property(i => i.IsPublic).HasDefaultValue(false);
         builder.Property(i => i.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(i => i.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
+        builder.Property(i => i.Version).IsRowVersion();
         builder.HasOne(i => i.Content).WithMany().HasForeignKey(i => i.ContentId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(i => i.Creator).WithMany().HasForeignKey(i => i.CreatorId).OnDelete(DeleteBehavior.NoAction);
         builder.HasMany(i => i.Texts).WithOne().HasForeignKey(t => t.ItemId).OnDelete(DeleteBehavior.Cascade);

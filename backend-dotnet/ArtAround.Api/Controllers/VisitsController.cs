@@ -3,6 +3,7 @@ using ArtAround.Api.Data;
 using ArtAround.Api.Domain;
 using ArtAround.Api.Dtos;
 using ArtAround.Api.Infrastructure;
+using ArtAround.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace ArtAround.Api.Controllers;
 
 [ApiController]
 [Route("api/visits")]
-public class VisitsController(AppDbContext db, IAuthorizationService authorization) : ControllerBase
+public class VisitsController(AppDbContext db, IAuthorizationService authorization, PurchaseService purchases) : ControllerBase
 {
     private const string NotFoundMessage = "Visit not found";
     private const string InvalidId = "Invalid id format";
@@ -64,11 +65,6 @@ public class VisitsController(AppDbContext db, IAuthorizationService authorizati
         {
             return ApiProblem.BadRequest("Museum not found");
         }
-        if (!await ItemsExistAsync(request))
-        {
-            return ApiProblem.BadRequest("One or more items do not exist");
-        }
-
         var title = request.Title!.Trim();
         var visit = new Visit
         {
@@ -85,10 +81,13 @@ public class VisitsController(AppDbContext db, IAuthorizationService authorizati
             Quiz = BuildQuiz(request.Quiz ?? []),
         };
 
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var purchase = await purchases.AdoptAsync(visit.CreatorId, ItemIds(request));
         db.Visits.Add(visit);
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
-        return StatusCode(StatusCodes.Status201Created, await WriteResponseAsync(visit.Id));
+        return StatusCode(StatusCodes.Status201Created, await WriteResponseAsync(visit, purchase));
     }
 
     [HttpPut("{id}")]
@@ -119,11 +118,6 @@ public class VisitsController(AppDbContext db, IAuthorizationService authorizati
         {
             return ApiProblem.Forbidden("Not authorized to update this visit");
         }
-        if (!await ItemsExistAsync(request))
-        {
-            return ApiProblem.BadRequest("One or more items do not exist");
-        }
-
         if (!string.IsNullOrWhiteSpace(request.Title))
         {
             visit.Title = request.Title.Trim();
@@ -150,8 +144,7 @@ public class VisitsController(AppDbContext db, IAuthorizationService authorizati
             visit.IsPublic = request.IsPublic.Value;
         }
 
-        // Children are replaced whole: EF deletes the removed rows and inserts the new ones,
-        // all in the one transaction SaveChanges opens.
+        // Children are replaced whole: EF deletes the removed rows and inserts the new ones.
         if (request.Blocks is not null || request.Sequence is not null)
         {
             var stops = request.Sequence ?? CurrentStops(visit);
@@ -166,8 +159,16 @@ public class VisitsController(AppDbContext db, IAuthorizationService authorizati
             visit.Quiz.AddRange(BuildQuiz(request.Quiz));
         }
 
+        // Always update the visit row: it bumps updated_at and makes the xmin check catch
+        // a concurrent save, even when only the children changed.
+        db.Entry(visit).State = EntityState.Modified;
+
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var purchase = await purchases.AdoptAsync(visit.CreatorId, ItemIds(request));
         await db.SaveChangesAsync();
-        return Ok(await WriteResponseAsync(visit.Id));
+        await transaction.CommitAsync();
+
+        return Ok(await WriteResponseAsync(visit, purchase));
     }
 
     [HttpDelete("{id}")]
@@ -193,22 +194,16 @@ public class VisitsController(AppDbContext db, IAuthorizationService authorizati
         return Ok(new { message = "Visit deleted" });
     }
 
-    private async Task<VisitWriteResponse> WriteResponseAsync(long visitId)
+    private async Task<VisitWriteResponse> WriteResponseAsync(Visit saved, PurchaseResult purchase)
     {
-        var userId = User.GetId();
-        var visit = await db.Visits.AsNoTracking().WithDetails().FirstAsync(v => v.Id == visitId);
-        var walletBalance = await db.Users.Where(u => u.Id == userId).Select(u => u.WalletBalance).FirstAsync();
-        return new VisitWriteResponse(VisitDetailDto.From(visit, userId), ChargedAmount: 0, walletBalance, AdoptedItemIds: []);
+        var visit = await db.Visits.AsNoTracking().WithDetails().FirstAsync(v => v.Id == saved.Id);
+        return new VisitWriteResponse(VisitDetailDto.From(visit, saved.CreatorId), purchase.ChargedAmount, purchase.WalletBalance, purchase.AdoptedItemIds);
     }
 
-    private async Task<bool> ItemsExistAsync(SaveVisitRequest request)
-    {
-        var ids = (request.Sequence ?? []).Select(s => s.ItemId!)
+    private static IEnumerable<long> ItemIds(SaveVisitRequest request) =>
+        (request.Sequence ?? []).Select(s => s.ItemId!)
             .Concat((request.Blocks ?? []).SelectMany(b => b.Items ?? []))
-            .Select(long.Parse)
-            .ToHashSet();
-        return ids.Count == 0 || await db.Items.CountAsync(i => ids.Contains(i.Id)) == ids.Count;
-    }
+            .Select(long.Parse);
 
     private static List<StopRequest> CurrentStops(Visit visit) =>
         visit.Blocks.OrderBy(b => b.Position)

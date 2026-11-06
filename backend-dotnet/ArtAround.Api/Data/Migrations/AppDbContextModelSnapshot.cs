@@ -221,6 +221,12 @@ namespace ArtAround.Api.Data.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id")
                         .HasName("pk_items");
 
@@ -375,6 +381,38 @@ namespace ArtAround.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ArtAround.Api.Domain.Purchase", b =>
+                {
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.Property<long>("ItemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("item_id");
+
+                    b.Property<int>("PricePaid")
+                        .HasColumnType("integer")
+                        .HasColumnName("price_paid");
+
+                    b.Property<DateTimeOffset>("PurchasedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("purchased_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("UserId", "ItemId")
+                        .HasName("pk_purchases");
+
+                    b.HasIndex("ItemId")
+                        .HasDatabaseName("ix_purchases_item_id");
+
+                    b.ToTable("purchases", null, t =>
+                        {
+                            t.HasCheckConstraint("purchases_price_paid_nonnegative", "price_paid >= 0");
+                        });
+                });
+
             modelBuilder.Entity("ArtAround.Api.Domain.SavedVisit", b =>
                 {
                     b.Property<long>("UserId")
@@ -521,6 +559,12 @@ namespace ArtAround.Api.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id")
                         .HasName("pk_visits");
@@ -790,6 +834,23 @@ namespace ArtAround.Api.Data.Migrations
                         .HasConstraintName("fk_points_of_interest_floor_plans_museum_id_floor");
                 });
 
+            modelBuilder.Entity("ArtAround.Api.Domain.Purchase", b =>
+                {
+                    b.HasOne("ArtAround.Api.Domain.Item", null)
+                        .WithMany("Purchases")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchases_items_item_id");
+
+                    b.HasOne("ArtAround.Api.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchases_users_user_id");
+                });
+
             modelBuilder.Entity("ArtAround.Api.Domain.SavedVisit", b =>
                 {
                     b.HasOne("ArtAround.Api.Domain.User", null)
@@ -898,6 +959,8 @@ namespace ArtAround.Api.Data.Migrations
 
             modelBuilder.Entity("ArtAround.Api.Domain.Item", b =>
                 {
+                    b.Navigation("Purchases");
+
                     b.Navigation("Texts");
                 });
 

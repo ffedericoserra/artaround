@@ -12,8 +12,12 @@ public class Item : IOwned
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
+    /// <summary>Postgres's xmin: SaveChanges fails if the row changed since it was read.</summary>
+    public uint Version { get; set; }
+
     public Content Content { get; set; } = null!;
     public User Creator { get; set; } = null!;
     public List<ItemText> Texts { get; set; } = [];
     public List<Content> AssociatedContents { get; set; } = [];
+    public List<Purchase> Purchases { get; set; } = [];
 }

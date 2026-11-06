@@ -96,7 +96,6 @@ public record VisitDetailDto(
     }
 }
 
-/// <summary>Wallet fields are always zero until Stage 7 adds charging.</summary>
 public record VisitWriteResponse(VisitDetailDto Visit, int ChargedAmount, int WalletBalance, List<string> AdoptedItemIds);
 
 public static class VisitMapping

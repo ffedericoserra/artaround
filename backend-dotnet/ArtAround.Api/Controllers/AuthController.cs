@@ -118,6 +118,23 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         return Ok(new { language = request.Language, user = UserDto.From(user) });
     }
 
+    [HttpPatch("wallet")]
+    public async Task<IActionResult> Recharge(RechargeWalletRequest request)
+    {
+        if (request.Amount is not (> 0 and <= 10000))
+        {
+            return ApiProblem.Validation([new("amount", "Recharge amount must be between 1 and 10000")]);
+        }
+
+        // One UPDATE that adds in the database: reading, adding and saving would lose concurrent recharges.
+        var id = User.GetId();
+        await db.Users.Where(u => u.Id == id)
+            .ExecuteUpdateAsync(set => set.SetProperty(u => u.WalletBalance, u => u.WalletBalance + request.Amount.Value));
+
+        var user = await db.Users.AsNoTracking().FirstAsync(u => u.Id == id);
+        return Ok(new { message = "Wallet recharged successfully", walletBalance = user.WalletBalance, user = UserDto.From(user) });
+    }
+
     [HttpPost("favorites/visits/{visitId}")]
     public async Task<IActionResult> ToggleFavorite(string visitId)
     {
