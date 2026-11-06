@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, getCachedUser } from '../api.js';
@@ -17,10 +17,8 @@ import { normalizeLanguage, speechLocaleForLanguage } from '../i18n.js';
 import '../styles/visitRun.css';
 import '../styles/session.css';
 
-const LENGTHS = ['15s', '30s', '60s'];
-
 /* Order matters: it's the order shown in the tone menu, easiest first. Values
- * match `descriptions[].tone` as written by the marketplace. */
+ * match `texts[].tone` as written by the marketplace. */
 const TONES = ['easy', 'medium', 'complex'];
 
 const TTS_SUPPORTED =
@@ -29,19 +27,11 @@ const TTS_SUPPORTED =
 /* Voice/tap commands logged for the guide during a group visit. This must stay
  * a subset of the activity enum in src/models/Session.js. */
 const LOGGED_COMMANDS = new Set([
-  'more',
-  'shorter',
   'complex',
   'simpler',
   'map',
   'details',
 ]);
-
-/* A horizontal drag shorter than this is a tap or a stray finger, not a swipe. */
-const SWIPE_THRESHOLD = 45;
-/* How far a gesture must travel before we commit to calling it horizontal or
- * vertical. Below this the direction is still ambiguous. */
-const SWIPE_AXIS_LOCK = 10;
 
 /**
  * The description for the requested tone, falling back to the item's first tone
@@ -50,13 +40,13 @@ const SWIPE_AXIS_LOCK = 10;
  * would be worse than showing the wrong tone.
  */
 function pickDescription(item, tone) {
-  const list = item?.descriptions;
+  const list = item?.texts;
   if (!list?.length) return null;
   return list.find((d) => d.tone === tone) || list[0];
 }
 
 function availableTones(item) {
-  const list = item?.descriptions || [];
+  const list = item?.texts || [];
   return TONES.filter((t) => list.some((d) => d.tone === t));
 }
 
@@ -113,34 +103,6 @@ function PeopleIcon() {
   );
 }
 
-function findTextEntry(description, lengthIdx, language) {
-  if (!description) return null;
-  const target = LENGTHS[lengthIdx];
-  const candidates = (description.texts || []).filter(
-    (entry) => entry.lengthCategory === target && entry.text
-  );
-  const preferred = normalizeLanguage(language) || 'it';
-  const entryLanguage = (entry) =>
-    String(entry.language || 'it').toLowerCase().split('-')[0];
-  return (
-    candidates.find((entry) => entryLanguage(entry) === preferred) ||
-    candidates.find((entry) => entryLanguage(entry) === 'it') ||
-    candidates[0] ||
-    null
-  );
-}
-
-function lastAvailableLengthIdx(description, language) {
-  if (!description?.texts?.length) return 0;
-  let max = 0;
-  for (let i = 0; i < LENGTHS.length; i++) {
-    if (findTextEntry(description, i, language)) {
-      max = i;
-    }
-  }
-  return max;
-}
-
 function buildSessionSteps(visit) {
   const sequence = visit?.sequence || [];
   const blocks = visit?.blocks || [];
@@ -177,7 +139,7 @@ export default function VisitRun() {
   /* One component, two routes. `/:museumSlug/:visitSlug` is a solo visit;
    * `/session/:sessionCode` is a group visit (Extension 1). Session mode adds a
    * toolbar, hands navigation to the guide and can end in a quiz — everything
-   * else (TTS, tone, swipe, map, commands) is identical, which is why this is one
+   * else (TTS, tone, map, commands) is identical, which is why this is one
    * runner rather than two that would drift apart. */
   const { museumSlug: museumSlugParam, visitSlug, sessionCode } = useParams();
   const navigate = useNavigate();
@@ -212,7 +174,6 @@ export default function VisitRun() {
 
   const [entryIndex, setEntryIndex] = useState(0);
   const [mode, setMode] = useState('describe');
-  const [lengthIdx, setLengthIdx] = useState(0);
 
   /* Tone is a visit-wide preference, not per-stop: a visitor who wants the easy
    * register wants it for the whole visit. Kept even when a given item can't
@@ -306,7 +267,6 @@ export default function VisitRun() {
           setCurrentStepIndex(0);
         }
         setMode('describe');
-        setLengthIdx(0);
         setLoading(false);
       })
       .catch((err) => {
@@ -349,7 +309,6 @@ export default function VisitRun() {
       'session:participants': (s) => setParticipants(s.participants || []),
       'session:item-changed': ({ currentItemIndex }) => {
         setAnswer(null);
-        setLengthIdx(0);
         /* Directions first when the group moves forward, the artwork itself when
          * it goes back — the same rule the solo runner uses for Next/Previous,
          * for the same reason: forward means everyone has to walk somewhere. */
@@ -361,7 +320,6 @@ export default function VisitRun() {
       'session:step-changed': ({ currentStepIndex: nextStep }) => {
         setCurrentStepIndex(nextStep || 0);
         setAnswer(null);
-        setLengthIdx(0);
       },
       'session:section-response': (response) =>
         setSectionResponses((list) => [
@@ -419,7 +377,6 @@ export default function VisitRun() {
   const item = entry?.itemId || null;
   const content = item?.contentId ? contents[item.contentId] : null;
   const description = pickDescription(item, tone);
-  const maxLen = lastAvailableLengthIdx(description, uiLanguage);
   const itemTones = availableTones(item);
   /* What the user is actually hearing, which is the preference only when this
    * item carries it. The pill shows this rather than the preference so it never
@@ -455,7 +412,6 @@ export default function VisitRun() {
   const isLast = inSession
     ? currentStepIndex >= sessionSteps.length - 1
     : entryIndex >= sequence.length - 1;
-  const atMaxLength = mode === 'describe' && lengthIdx >= maxLen;
 
   const quiz = sessionVisit?.quiz || [];
   const quizActive = inSession && quizStarted && quiz.length > 0;
@@ -485,13 +441,8 @@ export default function VisitRun() {
       bodyText = t('visitRun.nextDirectionsFallback');
     }
   } else if (description) {
-    const textEntry = findTextEntry(description, lengthIdx, uiLanguage);
-    if (textEntry) {
-      bodyText = textEntry.text;
-      bodyTextLanguage = String(textEntry.language || 'it').toLowerCase().split('-')[0];
-    } else {
-      bodyText = t('visitRun.descriptionLengthUnavailable');
-    }
+    bodyText = description.text;
+    bodyTextLanguage = 'it';
   } else {
     bodyText = t('visitRun.descriptionUnavailable');
   }
@@ -541,7 +492,6 @@ export default function VisitRun() {
     setAnswer(null);
     setEntryIndex((i) => i + 1);
     setMode('logistic');
-    setLengthIdx(0);
   }
 
   function goPrevious() {
@@ -553,7 +503,6 @@ export default function VisitRun() {
     setAnswer(null);
     setEntryIndex((i) => i - 1);
     setMode('describe');
-    setLengthIdx(0);
   }
 
   async function sessionAction(path, body) {
@@ -578,18 +527,7 @@ export default function VisitRun() {
     setAnswer(null);
     if (mode === 'logistic') {
       setMode('describe');
-      setLengthIdx(0);
-    } else if (lengthIdx < maxLen) {
-      setLengthIdx((i) => i + 1);
     }
-  }
-
-  // Length and tone are deliberately independent axes. Shortening selects a
-  // briefer text without changing its easy/medium/complex register.
-  function handleShorter() {
-    setAnswer(null);
-    if (mode !== 'describe') return;
-    if (lengthIdx > 0) setLengthIdx((i) => i - 1);
   }
 
   function adjacentTone(delta) {
@@ -614,55 +552,6 @@ export default function VisitRun() {
   function selectTone(next) {
     setToneMenuOpen(false);
     setTone(next);
-    // Keep the reading depth across the switch — you change tone to re-hear the
-    // same amount of detail differently — but don't land past the end if the new
-    // tone happens to carry fewer lengths.
-    const nextMax = lastAvailableLengthIdx(
-      pickDescription(item, next),
-      uiLanguage
-    );
-    setLengthIdx((i) => Math.min(i, nextMax));
-  }
-
-  /* Swipe across the description to change length: left for longer, right for
-   * shorter. The same ladder Describe! and the voice commands walk, so all three
-   * stay in sync through `lengthIdx`. */
-  function stepLength(delta) {
-    if (mode !== 'describe' || answer) return;
-    setLengthIdx((i) => Math.min(Math.max(i + delta, 0), maxLen));
-  }
-
-  const swipe = useRef(null);
-
-  function onDescPointerDown(e) {
-    if (mode !== 'describe' || answer) return;
-    swipe.current = { x: e.clientX, y: e.clientY, axis: null };
-  }
-
-  function onDescPointerMove(e) {
-    const s = swipe.current;
-    if (!s || s.axis) return;
-    const dx = e.clientX - s.x;
-    const dy = e.clientY - s.y;
-    if (Math.hypot(dx, dy) < SWIPE_AXIS_LOCK) return;
-    /* Lock the axis once the gesture is unambiguous. A vertical gesture is
-     * abandoned outright so it scrolls the description normally — this block is
-     * the only scrollable region on the page. */
-    s.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-  }
-
-  function onDescPointerUp(e) {
-    const s = swipe.current;
-    swipe.current = null;
-    if (!s || s.axis !== 'x') return;
-    const dx = e.clientX - s.x;
-    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
-    stepLength(dx < 0 ? 1 : -1);
-  }
-
-  function onDescPointerCancel() {
-    // Fired when the browser takes the gesture over for vertical scrolling.
-    swipe.current = null;
   }
 
   function answerAuthor() {
@@ -712,12 +601,6 @@ export default function VisitRun() {
       sessionAction('activity', { action: id });
     }
     switch (id) {
-      case 'more':
-        handleDescribe();
-        break;
-      case 'shorter':
-        handleShorter();
-        break;
       case 'complex':
         handleToneStep(1);
         break;
@@ -750,8 +633,6 @@ export default function VisitRun() {
   const unreadChat = Math.max(0, messages.length - seen.chat);
   const unreadActivities = Math.max(0, activities.length - seen.activities);
   const commandsDisabled = {
-    more: atMaxLength,
-    shorter: mode !== 'describe' || lengthIdx === 0,
     complex: mode !== 'describe' || !adjacentTone(1),
     simpler: mode !== 'describe' || !adjacentTone(-1),
     next: isLast || studentInSession,
@@ -1017,7 +898,7 @@ export default function VisitRun() {
             mode === 'logistic' ? ' is-prompt' : ''
           }`}
           onClick={handleDescribe}
-          disabled={atMaxLength}
+          disabled={mode === 'describe'}
         >
           {t('visitRun.describe')}
         </button>
@@ -1037,10 +918,6 @@ export default function VisitRun() {
         role="region"
         aria-labelledby="visit-current-content-title"
         aria-live="polite"
-        onPointerDown={onDescPointerDown}
-        onPointerMove={onDescPointerMove}
-        onPointerUp={onDescPointerUp}
-        onPointerCancel={onDescPointerCancel}
       >
         <div className="visit-desc-head">
           {answer ? (
@@ -1094,25 +971,6 @@ export default function VisitRun() {
             <span />
           )}
 
-          {mode === 'describe' && description && !answer && (
-            <div
-              className="visit-length-dots"
-              aria-label={t('visitRun.lengthAria', {
-                current: lengthIdx + 1,
-                total: maxLen + 1,
-              })}
-            >
-              {Array.from({ length: maxLen + 1 }, (_, i) => (
-                <span
-                  key={i}
-                  className={`visit-length-dot${
-                    i === lengthIdx ? ' is-active' : ''
-                  }`}
-                  aria-hidden="true"
-                />
-              ))}
-            </div>
-          )}
           {answer && (
             <button
               type="button"

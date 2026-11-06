@@ -1,9 +1,6 @@
 node_modules/
-package-lock.json
-!/backend-node/package-lock.json
 .env
 .env.production
-.mongo-creds
 .claude
 .DS_Store
 CLAUDE.md

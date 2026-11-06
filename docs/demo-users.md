@@ -15,7 +15,7 @@ Password: 12345678
 * Capolavori del rinascimento - autore1 - Standard
 * Botticelli e i suoi contemporanei - autore1 - Standard
 * Uffizi: dieci capolavori attraverso i secoli - autore2 - Standard
-* Uffizi in gruppo: dal Medioevo a Carabìvaggio - docente1 - Di gruppo
+* Uffizi in gruppo: dal Medioevo a Caravaggio - docente1 - Di gruppo
 ### MAMbo
 * Arte Moderna e Contemporanea - autore1 - Standard
 * Morandi e lo Spazialismo - autore1 - Standard

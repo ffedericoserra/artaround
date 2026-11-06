@@ -1,57 +1,46 @@
 /**
- * Session socket helper — the real-time half of a group visit (Extension 1).
+ * Session connection helper: the real-time half of a group visit.
  *
- * The server treats sockets as broadcast-only: every mutation goes through the
- * REST endpoints in `src/api.js` and the server echoes the result to the room.
- * So this module only ever *connects, joins a room and listens*. If you find
- * yourself wanting a socket.emit() for something that changes state, add a REST
- * call instead — the ownership and bounds checks live there.
+ * The server treats this connection as broadcast-only: every change goes through
+ * the REST endpoints in `src/api.js` and the server sends the result to the room.
+ * So this module only connects, joins a group and listens. If you want to send
+ * something that changes state, add a REST call instead: the ownership and bounds
+ * checks live there.
  */
 
-import { io } from 'socket.io-client';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import { getToken } from './api.js';
 
 /** Activity actions worth showing the teacher, labelled as the student saw them. */
 export const ACTIVITY_LABELS = {
   joined: 'activities.actions.joined',
   left: 'activities.actions.left',
-  more: 'activities.actions.more',
   simpler: 'activities.actions.simpler',
-  author: 'activities.actions.author',
-  year: 'activities.actions.year',
-  exit: 'activities.actions.exit',
   map: 'activities.actions.map',
-  // Legacy values kept so old sessions still render something sensible.
-  tellMore: 'activities.actions.tellMore',
-  tellLess: 'activities.actions.tellLess',
-  tooSimple: 'activities.actions.tooSimple',
 };
 
 /**
- * Connect and join the room for `code`.
+ * Connect and join the group for `code`.
  *
  * `handlers` is a map of event name → callback; every key is wired before the
- * join is emitted, so the catch-up `session:state` can't arrive before its
- * listener exists. Returns a disconnect function for the effect cleanup.
+ * join, so the catch-up `session:state` can't arrive before its listener exists.
+ * Returns a disconnect function for the effect cleanup.
  */
 export function connectSession(code, handlers = {}) {
-  const socket = io({
-    // Same origin in both dev (vite proxies /socket.io) and production (Express
-    // serves the built app), so there's no URL to configure.
-    path: '/socket.io',
-    auth: { token: getToken() },
-  });
+  const connection = new HubConnectionBuilder()
+    .withUrl('/hubs/session', { accessTokenFactory: () => getToken() })
+    .withAutomaticReconnect()
+    .build();
 
   for (const [event, handler] of Object.entries(handlers)) {
-    socket.on(event, handler);
+    connection.on(event, handler);
   }
 
-  // Re-join on every connect, not just the first: socket.io transparently
-  // reconnects after a network blip, and room membership does not survive it.
-  socket.on('connect', () => socket.emit('session:join', code));
+  const join = () => connection.invoke('JoinSession', code);
 
-  return () => {
-    socket.emit('session:leave');
-    socket.disconnect();
-  };
+  // Join again after every reconnect: group membership does not survive a dropped connection.
+  connection.onreconnected(join);
+  connection.start().then(join).catch(() => handlers['session:error']?.('Connection failed'));
+
+  return () => connection.stop();
 }

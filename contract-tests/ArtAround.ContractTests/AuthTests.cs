@@ -182,10 +182,7 @@ public class AuthTests(RegisteredUserFixture user) : IClassFixture<RegisteredUse
             $"Unexpected {response.StatusCode}");
     }
 
-    // "  ab  " must be rejected: users never see surrounding spaces. Node quirk: Zod runs min(3)
-    // before trim(), so Mongoose rejects it instead, with a different body ({ messages: [...] }
-    // instead of { details: [...] }). Only the common part is asserted; .NET should return the
-    // usual details[] shape.
+    // "  ab  " must be rejected: usernames are checked after trimming.
     [Fact]
     public async Task Register_UsernameTooShortAfterTrim_Returns400()
     {

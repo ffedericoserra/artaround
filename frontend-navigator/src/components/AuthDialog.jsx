@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, setToken, setCachedUser } from '../api.js';
 import { currentLanguage } from '../i18n.js';
-import openEyeIcon from '../../../frontend/marketplace/assets/artaround/open-eye-icon.png';
-import closedEyeIcon from '../../../frontend/marketplace/assets/artaround/closed-eye-icon.png';
+import openEyeIcon from '../../../frontend-marketplace/assets/artaround/open-eye-icon.png';
+import closedEyeIcon from '../../../frontend-marketplace/assets/artaround/closed-eye-icon.png';
 
 export default function AuthDialog({ initialMode = 'login', onClose, onSuccess }) {
   const { t } = useTranslation();

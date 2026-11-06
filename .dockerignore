@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/node_modules
+frontend-navigator/dist
+contract-tests
+.git
+.worktrees
+.claude
+docs
+note

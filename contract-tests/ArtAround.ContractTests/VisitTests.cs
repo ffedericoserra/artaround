@@ -41,7 +41,6 @@ public class VisitFixture : IAsyncLifetime
             contentId,
             targetAudience = "general",
             isPublic = true,
-            descriptions = new[] { new { tone = "easy", texts = new[] { new { text = "Stop", lengthCategory = "30s" } } } },
             texts = new[] { new { tone = "easy", text = "Stop" } },
         });
         Assert.Equal(HttpStatusCode.Created, item.StatusCode);
@@ -277,6 +276,28 @@ public class VisitTests(VisitFixture fixture) : IClassFixture<VisitFixture>
         Assert.Equal(1, visit.GetProperty("blocks").GetArrayLength());
         Assert.Equal(1, visit.GetProperty("quiz").GetArrayLength());
         Assert.Equal("Second", visit.GetProperty("sequence")[0].GetProperty("nextDirections").GetString());
+    }
+
+    // Saves racing on one visit may lose with a 409, never with a 500 or a broken visit.
+    [Fact]
+    public async Task ConcurrentUpdates_NeverCorruptTheVisit()
+    {
+        var id = await CreatedIdAsync();
+        var replacement = new
+        {
+            blocks = new[] { new { type = "artwork", blockName = "Raced", items = new[] { fixture.ItemId } } },
+            quiz = new[] { new { question = "Raced?", options = new[] { "Y", "N" }, correctIndex = 0 } },
+        };
+
+        var responses = await Task.WhenAll(Enumerable.Range(0, 5)
+            .Select(_ => Api.SendAsync(HttpMethod.Put, VisitUrl(id), fixture.OwnerToken, replacement)));
+
+        Assert.Contains(responses, r => r.StatusCode == HttpStatusCode.OK);
+        Assert.All(responses, r => Assert.True(r.StatusCode is HttpStatusCode.OK or HttpStatusCode.Conflict, $"Unexpected {r.StatusCode}"));
+        using var read = await Api.SendAsync(HttpMethod.Get, VisitUrl(id), fixture.OwnerToken);
+        var visit = (await Api.ReadJsonAsync(read)).GetProperty("visit");
+        Assert.Equal(1, visit.GetProperty("blocks").GetArrayLength());
+        Assert.Equal(1, visit.GetProperty("quiz").GetArrayLength());
     }
 
     [Fact]

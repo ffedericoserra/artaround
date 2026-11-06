@@ -1,0 +1,952 @@
+{
+  "users": [
+    {
+      "username": "autore1",
+      "walletBalance": 500
+    },
+    {
+      "username": "autore2",
+      "walletBalance": 4242
+    },
+    {
+      "username": "visitatore1",
+      "walletBalance": 100
+    },
+    {
+      "username": "visitatore2",
+      "walletBalance": 1489
+    },
+    {
+      "username": "docente1",
+      "walletBalance": 200
+    }
+  ],
+  "items": [
+    {
+      "author": "autore1",
+      "contentId": "mambo-burri-rosso-plastica",
+      "targetAudience": "tourist",
+      "price": 0
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-de-chirico-ettore-andromaca",
+      "targetAudience": "tourist",
+      "price": 5
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-fontana-concetto-spaziale",
+      "targetAudience": "tourist",
+      "price": 10
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-kounellis-senza-titolo",
+      "targetAudience": "tourist",
+      "price": 15
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-morandi-natura-morta-1946",
+      "targetAudience": "tourist",
+      "price": 25
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-morandi-paesaggio",
+      "targetAudience": "tourist",
+      "price": 20
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-paolini-giovane-guardando-lorenzo-lotto",
+      "targetAudience": "tourist",
+      "price": 0
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-pascali-bachi-da-setola",
+      "targetAudience": "tourist",
+      "price": 25
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-pistoletto-venere-stracci",
+      "targetAudience": "tourist",
+      "price": 45
+    },
+    {
+      "author": "autore1",
+      "contentId": "mambo-vedova-plurimo",
+      "targetAudience": "tourist",
+      "price": 35
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-botticelli-primavera",
+      "targetAudience": "tourist",
+      "price": 10
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-botticelli-venere",
+      "targetAudience": "tourist",
+      "price": 45
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-caravaggio-bacco",
+      "targetAudience": "tourist",
+      "price": 45
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-caravaggio-medusa",
+      "targetAudience": "tourist",
+      "price": 25
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-gentile-magi",
+      "targetAudience": "tourist",
+      "price": 35
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-giotto-maesta",
+      "targetAudience": "tourist",
+      "price": 25
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-leonardo-annunciazione",
+      "targetAudience": "tourist",
+      "price": 25
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-michelangelo-tondodoni",
+      "targetAudience": "tourist",
+      "price": 40
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-raffaello-cardellino",
+      "targetAudience": "tourist",
+      "price": 5
+    },
+    {
+      "author": "autore1",
+      "contentId": "uffizi-tiziano-venere",
+      "targetAudience": "tourist",
+      "price": 30
+    }
+  ],
+  "visits": [
+    {
+      "title": "Capolavori del Rinascimento",
+      "museum": "galleria-degli-uffizi",
+      "author": "autore1",
+      "description": "Un percorso attraverso i più grandi capolavori del Rinascimento fiorentino, da Botticelli a Michelangelo.",
+      "imageUrl": "/uploads/visits/rinascimento.jpg",
+      "type": "standard",
+      "length": "deep",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Mainboard",
+          "stops": [
+            {
+              "contentId": "uffizi-botticelli-venere",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "uffizi-botticelli-primavera",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "uffizi-leonardo-annunciazione",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            },
+            {
+              "contentId": "uffizi-michelangelo-tondodoni",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "uffizi-raffaello-cardellino",
+              "nextDirections": "Attraversa l'arco sulla sinistra",
+              "prevDirections": "Vai verso la finestra"
+            },
+            {
+              "contentId": "uffizi-tiziano-venere",
+              "nextDirections": "Segui il corridoio fino in fondo",
+              "prevDirections": "Attraversa l'arco sulla sinistra"
+            },
+            {
+              "contentId": "uffizi-caravaggio-bacco",
+              "nextDirections": "Prosegui verso nord",
+              "prevDirections": "Segui il corridoio fino in fondo"
+            },
+            {
+              "contentId": "uffizi-caravaggio-medusa",
+              "nextDirections": "Oltrepassa la porta sulla destra",
+              "prevDirections": "Prosegui verso nord"
+            },
+            {
+              "contentId": "uffizi-gentile-magi",
+              "nextDirections": "Continua lungo il percorso segnato",
+              "prevDirections": "Oltrepassa la porta sulla destra"
+            },
+            {
+              "contentId": "uffizi-giotto-maesta",
+              "nextDirections": "",
+              "prevDirections": "Continua lungo il percorso segnato"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Botticelli e i suoi contemporanei",
+      "museum": "galleria-degli-uffizi",
+      "author": "autore1",
+      "description": "Esplora l'arte di Botticelli e degli artisti che hanno condiviso la sua epoca.",
+      "imageUrl": "/uploads/visits/botticelli.jpg",
+      "type": "standard",
+      "length": "quick",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Mainboard",
+          "stops": [
+            {
+              "contentId": "uffizi-botticelli-venere",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "uffizi-botticelli-primavera",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "uffizi-leonardo-annunciazione",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            },
+            {
+              "contentId": "uffizi-michelangelo-tondodoni",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "uffizi-raffaello-cardellino",
+              "nextDirections": "",
+              "prevDirections": "Vai verso la finestra"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Uffizi: dieci capolavori attraverso i secoli",
+      "museum": "galleria-degli-uffizi",
+      "author": "autore2",
+      "description": "Un itinerario completo in dieci tappe, da Giotto e Gentile da Fabriano fino alle celebri opere di Botticelli, Leonardo, Michelangelo, Raffaello, Tiziano e Caravaggio.",
+      "imageUrl": null,
+      "type": "standard",
+      "length": "normal",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Mainboard",
+          "stops": [
+            {
+              "contentId": "uffizi-giotto-maesta",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "uffizi-gentile-magi",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "uffizi-leonardo-annunciazione",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            },
+            {
+              "contentId": "uffizi-botticelli-primavera",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "uffizi-botticelli-venere",
+              "nextDirections": "Attraversa l'arco sulla sinistra",
+              "prevDirections": "Vai verso la finestra"
+            },
+            {
+              "contentId": "uffizi-raffaello-cardellino",
+              "nextDirections": "Segui il corridoio fino in fondo",
+              "prevDirections": "Attraversa l'arco sulla sinistra"
+            },
+            {
+              "contentId": "uffizi-michelangelo-tondodoni",
+              "nextDirections": "Prosegui verso nord",
+              "prevDirections": "Segui il corridoio fino in fondo"
+            },
+            {
+              "contentId": "uffizi-tiziano-venere",
+              "nextDirections": "Oltrepassa la porta sulla destra",
+              "prevDirections": "Prosegui verso nord"
+            },
+            {
+              "contentId": "uffizi-caravaggio-bacco",
+              "nextDirections": "Continua lungo il percorso segnato",
+              "prevDirections": "Oltrepassa la porta sulla destra"
+            },
+            {
+              "contentId": "uffizi-caravaggio-medusa",
+              "nextDirections": "",
+              "prevDirections": "Continua lungo il percorso segnato"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Uffizi in gruppo: dal Medioevo a Caravaggio",
+      "museum": "galleria-degli-uffizi",
+      "author": "docente1",
+      "description": "Visita pubblica e sincronizzata attraverso i capolavori degli Uffizi, con confronti tra le opere e prova finale.",
+      "imageUrl": "/uploads/visits/scuole.jpg",
+      "type": "synchronized",
+      "length": "deep",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Dalle origini al Rinascimento",
+          "stops": [
+            {
+              "contentId": "uffizi-giotto-maesta",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "uffizi-gentile-magi",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "uffizi-leonardo-annunciazione",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Ricapitoliamo le prime opere",
+          "questions": [
+            {
+              "prompt": "Quale opera appena vista è la più antica?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Maestà di Ognissanti",
+                "Adorazione dei Magi",
+                "Annunciazione"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Chi ha dipinto l'Annunciazione del percorso?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Leonardo da Vinci",
+                "Sandro Botticelli",
+                "Giotto",
+                "Gentile da Fabriano"
+              ],
+              "correctIndex": 0
+            }
+          ]
+        },
+        {
+          "type": "artwork",
+          "name": "Le opere di Botticelli",
+          "stops": [
+            {
+              "contentId": "uffizi-botticelli-primavera",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "uffizi-botticelli-venere",
+              "nextDirections": "Attraversa l'arco sulla sinistra",
+              "prevDirections": "Vai verso la finestra"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Confronto su Botticelli",
+          "questions": [
+            {
+              "prompt": "Quale opera di Botticelli vista nel percorso è datata 1482?",
+              "answerType": "multiple-choice",
+              "options": [
+                "La Primavera",
+                "La nascita di Venere",
+                "Madonna del Cardellino"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Descrivi un elemento che accomuna La Primavera e La nascita di Venere.",
+              "answerType": "open",
+              "options": []
+            }
+          ]
+        },
+        {
+          "type": "artwork",
+          "name": "L'Alto Rinascimento",
+          "stops": [
+            {
+              "contentId": "uffizi-raffaello-cardellino",
+              "nextDirections": "Segui il corridoio fino in fondo",
+              "prevDirections": "Attraversa l'arco sulla sinistra"
+            },
+            {
+              "contentId": "uffizi-michelangelo-tondodoni",
+              "nextDirections": "Prosegui verso nord",
+              "prevDirections": "Segui il corridoio fino in fondo"
+            },
+            {
+              "contentId": "uffizi-tiziano-venere",
+              "nextDirections": "Oltrepassa la porta sulla destra",
+              "prevDirections": "Prosegui verso nord"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Date e autori",
+          "questions": [
+            {
+              "prompt": "Quale opera vista in questo blocco è stata realizzata nel 1506?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Madonna del Cardellino",
+                "Tondo Doni",
+                "Venere di Urbino"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Quale opera del blocco è datata 1538?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Tondo Doni",
+                "Venere di Urbino",
+                "Madonna del Cardellino"
+              ],
+              "correctIndex": 1
+            }
+          ]
+        },
+        {
+          "type": "artwork",
+          "name": "Caravaggio agli Uffizi",
+          "stops": [
+            {
+              "contentId": "uffizi-caravaggio-bacco",
+              "nextDirections": "Continua lungo il percorso segnato",
+              "prevDirections": "Oltrepassa la porta sulla destra"
+            },
+            {
+              "contentId": "uffizi-caravaggio-medusa",
+              "nextDirections": "",
+              "prevDirections": "Continua lungo il percorso segnato"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Prova finale: capolavori degli Uffizi",
+          "questions": [
+            {
+              "prompt": "Quale artista ha dipinto sia Bacco sia Medusa?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Caravaggio",
+                "Tiziano Vecellio",
+                "Leonardo da Vinci",
+                "Sandro Botticelli"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Quale coppia di opere del percorso condivide l'anno 1597?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Bacco e Medusa",
+                "La Primavera e La nascita di Venere",
+                "Madonna del Cardellino e Tondo Doni",
+                "Maestà di Ognissanti e Adorazione dei Magi"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Qual è l'opera più antica dell'intero itinerario?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Maestà di Ognissanti",
+                "Annunciazione",
+                "La Primavera",
+                "Tondo Doni"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Chi ha realizzato il Tondo Doni?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Raffaello Sanzio",
+                "Michelangelo Buonarroti",
+                "Giotto",
+                "Gentile da Fabriano"
+              ],
+              "correctIndex": 1
+            },
+            {
+              "prompt": "Chi ha dipinto la Venere di Urbino?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Tiziano Vecellio",
+                "Caravaggio",
+                "Sandro Botticelli",
+                "Leonardo da Vinci"
+              ],
+              "correctIndex": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Arte Moderna e Contemporanea",
+      "museum": "mambo-museo-darte-moderna-di-bologna",
+      "author": "autore1",
+      "description": "Un viaggio attraverso le correnti artistiche del Novecento italiano, da Morandi all'Arte Povera.",
+      "imageUrl": "/uploads/visits/mambo-moderna.jpg",
+      "type": "standard",
+      "length": "deep",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Mainboard",
+          "stops": [
+            {
+              "contentId": "mambo-morandi-natura-morta-1946",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "mambo-morandi-paesaggio",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "mambo-burri-rosso-plastica",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            },
+            {
+              "contentId": "mambo-fontana-concetto-spaziale",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "mambo-de-chirico-ettore-andromaca",
+              "nextDirections": "Attraversa l'arco sulla sinistra",
+              "prevDirections": "Vai verso la finestra"
+            },
+            {
+              "contentId": "mambo-vedova-plurimo",
+              "nextDirections": "Segui il corridoio fino in fondo",
+              "prevDirections": "Attraversa l'arco sulla sinistra"
+            },
+            {
+              "contentId": "mambo-kounellis-senza-titolo",
+              "nextDirections": "Prosegui verso nord",
+              "prevDirections": "Segui il corridoio fino in fondo"
+            },
+            {
+              "contentId": "mambo-paolini-giovane-guardando-lorenzo-lotto",
+              "nextDirections": "Oltrepassa la porta sulla destra",
+              "prevDirections": "Prosegui verso nord"
+            },
+            {
+              "contentId": "mambo-pascali-bachi-da-setola",
+              "nextDirections": "Continua lungo il percorso segnato",
+              "prevDirections": "Oltrepassa la porta sulla destra"
+            },
+            {
+              "contentId": "mambo-pistoletto-venere-stracci",
+              "nextDirections": "",
+              "prevDirections": "Continua lungo il percorso segnato"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Morandi e lo Spazialismo",
+      "museum": "mambo-museo-darte-moderna-di-bologna",
+      "author": "autore1",
+      "description": "Dalle nature morte di Morandi ai tagli di Fontana: due visioni dell'arte italiana.",
+      "imageUrl": "/uploads/visits/mambo-morandi.jpg",
+      "type": "standard",
+      "length": "quick",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Mainboard",
+          "stops": [
+            {
+              "contentId": "mambo-morandi-natura-morta-1946",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "mambo-morandi-paesaggio",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "mambo-burri-rosso-plastica",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            },
+            {
+              "contentId": "mambo-fontana-concetto-spaziale",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "mambo-de-chirico-ettore-andromaca",
+              "nextDirections": "",
+              "prevDirections": "Vai verso la finestra"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "MAMbo in gruppo: materia, spazio e memoria",
+      "museum": "mambo-museo-darte-moderna-di-bologna",
+      "author": "docente1",
+      "description": "Visita pubblica e sincronizzata attraverso le ricerche del Novecento, dalle forme silenziose di Morandi alle sperimentazioni su materia, spazio e memoria.",
+      "imageUrl": "/uploads/visits/mambo-povera.jpg",
+      "type": "synchronized",
+      "length": "deep",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Forme, paesaggi e materia",
+          "stops": [
+            {
+              "contentId": "mambo-morandi-natura-morta-1946",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "mambo-morandi-paesaggio",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "mambo-burri-rosso-plastica",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Confronto tra Morandi e Burri",
+          "questions": [
+            {
+              "prompt": "Confronta Natura morta e Paesaggio: quale somiglianza noti nell'uso delle forme o dei colori?",
+              "answerType": "open",
+              "options": []
+            },
+            {
+              "prompt": "Quale artista ha realizzato Rosso Plastica?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Giorgio Morandi",
+                "Alberto Burri",
+                "Lucio Fontana",
+                "Emilio Vedova"
+              ],
+              "correctIndex": 1
+            }
+          ]
+        },
+        {
+          "type": "artwork",
+          "name": "Oltre il quadro: spazio e gesto",
+          "stops": [
+            {
+              "contentId": "mambo-fontana-concetto-spaziale",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "mambo-de-chirico-ettore-andromaca",
+              "nextDirections": "Attraversa l'arco sulla sinistra",
+              "prevDirections": "Vai verso la finestra"
+            },
+            {
+              "contentId": "mambo-vedova-plurimo",
+              "nextDirections": "Segui il corridoio fino in fondo",
+              "prevDirections": "Attraversa l'arco sulla sinistra"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Confronto tra immagini e spazio",
+          "questions": [
+            {
+              "prompt": "Quale opera appena vista è di Lucio Fontana?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Concetto spaziale, Attese",
+                "Ettore e Andromaca",
+                "Plurimo",
+                "Rosso Plastica"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Quale opera appena vista raffigura Ettore e Andromaca?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Ettore e Andromaca",
+                "Senza titolo",
+                "Plurimo",
+                "Paesaggio"
+              ],
+              "correctIndex": 0
+            }
+          ]
+        },
+        {
+          "type": "artwork",
+          "name": "Arte Povera e sguardi sul passato",
+          "stops": [
+            {
+              "contentId": "mambo-kounellis-senza-titolo",
+              "nextDirections": "Prosegui verso nord",
+              "prevDirections": "Segui il corridoio fino in fondo"
+            },
+            {
+              "contentId": "mambo-paolini-giovane-guardando-lorenzo-lotto",
+              "nextDirections": "Oltrepassa la porta sulla destra",
+              "prevDirections": "Prosegui verso nord"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Confronto tra materia e memoria",
+          "questions": [
+            {
+              "prompt": "Chi è l'autore di Senza titolo vista in questo blocco?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Jannis Kounellis",
+                "Giulio Paolini",
+                "Pino Pascali",
+                "Michelangelo Pistoletto"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Quale pittore del passato è nominato nel titolo Giovane che guarda Lorenzo Lotto?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Lorenzo Lotto",
+                "Sandro Botticelli",
+                "Caravaggio",
+                "Raffaello Sanzio"
+              ],
+              "correctIndex": 0
+            }
+          ]
+        },
+        {
+          "type": "artwork",
+          "name": "Materiali e bellezza classica",
+          "stops": [
+            {
+              "contentId": "mambo-pascali-bachi-da-setola",
+              "nextDirections": "Continua lungo il percorso segnato",
+              "prevDirections": "Oltrepassa la porta sulla destra"
+            },
+            {
+              "contentId": "mambo-pistoletto-venere-stracci",
+              "nextDirections": "",
+              "prevDirections": "Continua lungo il percorso segnato"
+            }
+          ]
+        },
+        {
+          "type": "questions",
+          "name": "Prova finale: il Novecento al MAMbo",
+          "questions": [
+            {
+              "prompt": "Quale opera del percorso è stata realizzata nel 1968?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Bachi da setola",
+                "Venere degli stracci",
+                "Senza titolo",
+                "Concetto spaziale, Attese"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Chi ha realizzato la Venere degli stracci?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Jannis Kounellis",
+                "Giulio Paolini",
+                "Michelangelo Pistoletto",
+                "Pino Pascali"
+              ],
+              "correctIndex": 2
+            },
+            {
+              "prompt": "Quale coppia di opere del percorso è datata 1962?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Rosso Plastica e Plurimo",
+                "Natura morta e Paesaggio",
+                "Ettore e Andromaca e Venere degli stracci",
+                "Bachi da setola e Giovane che guarda Lorenzo Lotto"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Quale opera del percorso è di Giorgio de Chirico?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Ettore e Andromaca",
+                "Rosso Plastica",
+                "Bachi da setola",
+                "Senza titolo"
+              ],
+              "correctIndex": 0
+            },
+            {
+              "prompt": "Quale artista ha realizzato Concetto spaziale, Attese?",
+              "answerType": "multiple-choice",
+              "options": [
+                "Lucio Fontana",
+                "Emilio Vedova",
+                "Alberto Burri",
+                "Giorgio Morandi"
+              ],
+              "correctIndex": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "MAMbo: dieci storie dell'arte italiana",
+      "museum": "mambo-museo-darte-moderna-di-bologna",
+      "author": "autore2",
+      "description": "Dieci opere raccontano l'arte italiana del Novecento, dalle atmosfere sospese di Morandi alle sperimentazioni di Burri, Fontana, Kounellis, Pascali e Pistoletto.",
+      "imageUrl": null,
+      "type": "standard",
+      "length": "normal",
+      "isPublic": true,
+      "blocks": [
+        {
+          "type": "artwork",
+          "name": "Mainboard",
+          "stops": [
+            {
+              "contentId": "mambo-morandi-natura-morta-1946",
+              "nextDirections": "Prosegui dritto lungo il corridoio",
+              "prevDirections": ""
+            },
+            {
+              "contentId": "mambo-morandi-paesaggio",
+              "nextDirections": "Gira a destra dopo la colonna",
+              "prevDirections": "Prosegui dritto lungo il corridoio"
+            },
+            {
+              "contentId": "mambo-burri-rosso-plastica",
+              "nextDirections": "Entra nella sala successiva",
+              "prevDirections": "Gira a destra dopo la colonna"
+            },
+            {
+              "contentId": "mambo-fontana-concetto-spaziale",
+              "nextDirections": "Vai verso la finestra",
+              "prevDirections": "Entra nella sala successiva"
+            },
+            {
+              "contentId": "mambo-de-chirico-ettore-andromaca",
+              "nextDirections": "Attraversa l'arco sulla sinistra",
+              "prevDirections": "Vai verso la finestra"
+            },
+            {
+              "contentId": "mambo-vedova-plurimo",
+              "nextDirections": "Segui il corridoio fino in fondo",
+              "prevDirections": "Attraversa l'arco sulla sinistra"
+            },
+            {
+              "contentId": "mambo-kounellis-senza-titolo",
+              "nextDirections": "Prosegui verso nord",
+              "prevDirections": "Segui il corridoio fino in fondo"
+            },
+            {
+              "contentId": "mambo-paolini-giovane-guardando-lorenzo-lotto",
+              "nextDirections": "Oltrepassa la porta sulla destra",
+              "prevDirections": "Prosegui verso nord"
+            },
+            {
+              "contentId": "mambo-pascali-bachi-da-setola",
+              "nextDirections": "Continua lungo il percorso segnato",
+              "prevDirections": "Oltrepassa la porta sulla destra"
+            },
+            {
+              "contentId": "mambo-pistoletto-venere-stracci",
+              "nextDirections": "",
+              "prevDirections": "Continua lungo il percorso segnato"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

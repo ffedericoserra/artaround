@@ -51,7 +51,6 @@ public class SessionFixture : IAsyncLifetime
             contentId,
             targetAudience = "general",
             isPublic = true,
-            descriptions = new[] { new { tone = "easy", texts = new[] { new { text = "Stop", lengthCategory = "30s" } } } },
             texts = new[] { new { tone = "easy", text = "Stop" } },
         });
         var itemId = (await Api.ReadJsonAsync(item)).GetProperty("item").GetProperty("_id").GetString()!;

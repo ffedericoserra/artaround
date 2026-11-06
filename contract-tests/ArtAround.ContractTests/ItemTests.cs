@@ -32,21 +32,11 @@ public class PrivateItemFixture : IAsyncLifetime
     // Unlike users, items can be deleted through the API, so clean up.
     public async Task DisposeAsync() => await DeleteItemAsync(OwnerToken, PrivateItemId);
 
-    // Carries both text shapes until the cutover: Node reads descriptions, .NET reads texts,
-    // and each ignores the other.
     public object ValidBody(bool isPublic) => new
     {
         contentId = _contentId,
         targetAudience = "general",
         isPublic,
-        descriptions = new[]
-        {
-            new
-            {
-                tone = "easy",
-                texts = new[] { new { text = "Contract test description", lengthCategory = "30s" } },
-            },
-        },
         texts = new[] { new { tone = "easy", text = "Contract test description" } },
     };
 
@@ -117,8 +107,7 @@ public class ItemTests(PrivateItemFixture fixture) : IClassFixture<PrivateItemFi
 
     /* ---------- not found ---------- */
 
-    // A deleted item's id is well-formed in whatever id format the backend uses
-    // (Mongo ObjectId today, bigint in .NET). A hard-coded id would not be.
+    // A deleted item's id is guaranteed well-formed and guaranteed gone. A hard-coded id wouldn't be.
     [Fact]
     public async Task GetItem_Deleted_Returns404()
     {
@@ -138,7 +127,6 @@ public class ItemTests(PrivateItemFixture fixture) : IClassFixture<PrivateItemFi
         using var response = await Api.SendAsync(HttpMethod.Get, ItemUrl("not-an-id"));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.DoesNotContain("ObjectId", (await Api.ReadJsonAsync(response)).GetProperty("error").GetString());
     }
 
     /* ---------- create ---------- */
@@ -157,7 +145,6 @@ public class ItemTests(PrivateItemFixture fixture) : IClassFixture<PrivateItemFi
         using var response = await Api.SendAsync(HttpMethod.Post, PrivateItemFixture.ItemsApi, fixture.OwnerToken, new
         {
             contentId = "any",
-            descriptions = Array.Empty<object>(),
             texts = Array.Empty<object>(),
         });
 

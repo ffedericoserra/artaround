@@ -61,7 +61,7 @@ public class MuseumTests(SeededMuseumFixture fixture) : IClassFixture<SeededMuse
         Assert.False(uffizi.TryGetProperty("floorPlans", out _));
     }
 
-    // Ordinal, like Mongo's sort. Postgres sorts by the column's collation, which may differ.
+    // Ordinal. Postgres would otherwise sort by the column's collation, which may differ.
     [Fact]
     public async Task ListMuseums_SortedByName()
     {

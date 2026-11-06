@@ -18,20 +18,6 @@ export const SPEECH_SUPPORTED = !!SR;
 
 export const COMMANDS = [
   {
-    id: 'more',
-    phrases: {
-      it: ['versione più lunga', 'dimmi di più', 'allunga la descrizione'],
-      en: ['longer version', 'tell me more', 'make it longer'],
-    },
-  },
-  {
-    id: 'shorter',
-    phrases: {
-      it: ['versione più breve', 'sintetizza', 'accorcia la descrizione', 'più breve'],
-      en: ['shorter version', 'summarize', 'make it shorter'],
-    },
-  },
-  {
     id: 'complex',
     phrases: {
       it: ['tono più complesso', 'rendi più complesso', 'approfondisci'],

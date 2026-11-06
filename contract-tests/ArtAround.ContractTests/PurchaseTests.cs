@@ -45,7 +45,6 @@ public class PurchaseTests(SeededContentFixture fixture) : IClassFixture<SeededC
             targetAudience = "general",
             price,
             isPublic,
-            descriptions = new[] { new { tone = "easy", texts = new[] { new { text = "Text", lengthCategory = "30s" } } } },
             texts = new[] { new { tone = "easy", text = "Text" } },
         });
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -184,6 +183,19 @@ public class PurchaseTests(SeededContentFixture fixture) : IClassFixture<SeededC
         using var response = await PurchaseAsync(buyer, itemId);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteItem_AlreadySold_Returns409()
+    {
+        var seller = await NewUserAsync();
+        var buyer = await NewUserAsync();
+        var itemId = await CreateItemAsync(seller, price: 10);
+        using var purchase = await PurchaseAsync(buyer, itemId);
+
+        using var response = await Api.SendAsync(HttpMethod.Delete, $"/api/items/{itemId}", seller);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
     /* ---------- wallet ---------- */
