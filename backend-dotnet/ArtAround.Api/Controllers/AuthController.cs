@@ -1,14 +1,13 @@
 using ArtAround.Api.Data;
 using ArtAround.Api.Domain;
 using ArtAround.Api.Dtos;
+using ArtAround.Api.Infrastructure;
 using ArtAround.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Npgsql;
-using System.Security.Claims;
 
 namespace ArtAround.Api.Controllers;
 
@@ -25,7 +24,7 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         var errors = request.Validate();
         if (errors.Count > 0)
         {
-            return BadRequest(new ValidationErrorResponse(errors));
+            return ApiProblem.Validation(errors);
         }
 
         var user = new User
@@ -42,7 +41,7 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         }
         catch (DbUpdateException e) when (e.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
-            return Conflict(new { error = "Username or email already exists" });
+            return ApiProblem.Conflict("Username or email already exists");
         }
 
         return StatusCode(StatusCodes.Status201Created, new { user = UserDto.From(user), token = tokens.CreateToken(user) });
@@ -55,7 +54,7 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         var errors = request.Validate();
         if (errors.Count > 0)
         {
-            return BadRequest(new ValidationErrorResponse(errors));
+            return ApiProblem.Validation(errors);
         }
 
         var login = request.Username.Trim().ToLowerInvariant();
@@ -64,13 +63,13 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
         {
             // Same work as a real check, so response time doesn't reveal which usernames exist.
             hasher.HashPassword(new User(), request.Password);
-            return Unauthorized(new { error = InvalidCredentials });
+            return ApiProblem.Unauthorized(InvalidCredentials);
         }
 
         var result = hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (result == PasswordVerificationResult.Failed)
         {
-            return Unauthorized(new { error = InvalidCredentials });
+            return ApiProblem.Unauthorized(InvalidCredentials);
         }
         if (result == PasswordVerificationResult.SuccessRehashNeeded)
         {
@@ -84,11 +83,65 @@ public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, Token
     [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
-        var id = long.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!);
+        var id = User.GetId();
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+        if (user is null)
+        {
+            return ApiProblem.Unauthorized("User not found");
+        }
 
-        return user is null
-            ? Unauthorized(new { error = "User not found" })
-            : Ok(new { user = UserDto.From(user) });
+        var myVisits = await db.Visits.AsNoTracking().Where(v => v.CreatorId == id)
+            .WithSummary().OrderByDescending(v => v.UpdatedAt).ToListAsync();
+        var savedVisits = await db.Visits.AsNoTracking().Where(v => db.SavedVisits.Any(s => s.UserId == id && s.VisitId == v.Id))
+            .WithSummary().OrderBy(v => v.Id).ToListAsync();
+
+        return Ok(new { user = ProfileDto.From(user, myVisits, savedVisits) });
+    }
+
+    [HttpPatch("language")]
+    public async Task<IActionResult> UpdateLanguage(UpdateLanguageRequest request)
+    {
+        if (!Labels.Languages.IsValid(request.Language))
+        {
+            return ApiProblem.Validation([new("language", "Invalid language")]);
+        }
+
+        var id = User.GetId();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user is null)
+        {
+            return ApiProblem.NotFound("User not found");
+        }
+
+        user.Language = Labels.Languages.Parse(request.Language!);
+        await db.SaveChangesAsync();
+        return Ok(new { language = request.Language, user = UserDto.From(user) });
+    }
+
+    [HttpPost("favorites/visits/{visitId}")]
+    public async Task<IActionResult> ToggleFavorite(string visitId)
+    {
+        if (!long.TryParse(visitId, out var id))
+        {
+            return ApiProblem.BadRequest("Invalid id format");
+        }
+        if (!await db.Visits.AnyAsync(v => v.Id == id))
+        {
+            return ApiProblem.NotFound("Visit not found");
+        }
+
+        var userId = User.GetId();
+        var saved = await db.SavedVisits.FindAsync(userId, id);
+        if (saved is null)
+        {
+            db.SavedVisits.Add(new SavedVisit { UserId = userId, VisitId = id });
+        }
+        else
+        {
+            db.SavedVisits.Remove(saved);
+        }
+
+        await db.SaveChangesAsync();
+        return Ok(new { message = "Preferiti aggiornati", isSaved = saved is null });
     }
 }

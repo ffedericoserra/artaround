@@ -15,6 +15,6 @@ public class MuseumConfiguration : IEntityTypeConfiguration<Museum>
         builder.Property(m => m.Id).UseIdentityAlwaysColumn();
         builder.HasIndex(m => m.Slug).IsUnique();
         builder.Property(m => m.CreatedAt).HasDefaultValueSql("now()");
-        builder.Property(m => m.UpdatedAt).HasDefaultValueSql("now()");
+        builder.Property(m => m.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
     }
 }

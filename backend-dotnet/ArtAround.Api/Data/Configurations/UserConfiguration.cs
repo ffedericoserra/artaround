@@ -19,6 +19,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Language).HasDefaultValue(Language.It);
         builder.Property(u => u.WalletBalance).HasDefaultValue(100);
         builder.Property(u => u.CreatedAt).HasDefaultValueSql("now()");
-        builder.Property(u => u.UpdatedAt).HasDefaultValueSql("now()");
+        builder.Property(u => u.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
     }
 }

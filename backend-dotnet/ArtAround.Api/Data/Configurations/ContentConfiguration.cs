@@ -18,7 +18,7 @@ public class ContentConfiguration : IEntityTypeConfiguration<Content>
         builder.HasIndex(c => new { c.MuseumId, c.Type });
         builder.Property(c => c.Floor).HasDefaultValue(0);
         builder.Property(c => c.CreatedAt).HasDefaultValueSql("now()");
-        builder.Property(c => c.UpdatedAt).HasDefaultValueSql("now()");
+        builder.Property(c => c.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
         builder.HasOne<FloorPlan>()
             .WithMany()
             .HasForeignKey(c => new { c.MuseumId, c.Floor })

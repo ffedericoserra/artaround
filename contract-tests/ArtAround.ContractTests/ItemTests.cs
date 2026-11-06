@@ -6,6 +6,8 @@ namespace ArtAround.ContractTests;
 /*
  * GET    /api/items/:id - Read one item (public, or private to creator/buyer)
  * POST   /api/items     - Create item (auth)
+ * GET    /api/items     - List items (public, plus the caller's own)
+ * PUT    /api/items/:id - Update item (creator only)
  * DELETE /api/items/:id - Delete item (creator only)
  */
 
@@ -30,22 +32,27 @@ public class PrivateItemFixture : IAsyncLifetime
     // Unlike users, items can be deleted through the API, so clean up.
     public async Task DisposeAsync() => await DeleteItemAsync(OwnerToken, PrivateItemId);
 
+    // Carries both text shapes until the cutover: Node reads descriptions, .NET reads texts,
+    // and each ignores the other.
+    public object ValidBody(bool isPublic) => new
+    {
+        contentId = _contentId,
+        targetAudience = "general",
+        isPublic,
+        descriptions = new[]
+        {
+            new
+            {
+                tone = "easy",
+                texts = new[] { new { text = "Contract test description", lengthCategory = "30s" } },
+            },
+        },
+        texts = new[] { new { tone = "easy", text = "Contract test description" } },
+    };
+
     public async Task<string> CreateItemAsync(string token, bool isPublic)
     {
-        using var response = await Api.SendAsync(HttpMethod.Post, ItemsApi, token, new
-        {
-            contentId = _contentId,
-            targetAudience = "Contract test",
-            isPublic,
-            descriptions = new[]
-            {
-                new
-                {
-                    tone = "easy",
-                    texts = new[] { new { text = "Contract test description", lengthCategory = "30s" } },
-                },
-            },
-        });
+        using var response = await Api.SendAsync(HttpMethod.Post, ItemsApi, token, ValidBody(isPublic));
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         var body = await Api.ReadJsonAsync(response);
@@ -132,5 +139,126 @@ public class ItemTests(PrivateItemFixture fixture) : IClassFixture<PrivateItemFi
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.DoesNotContain("ObjectId", (await Api.ReadJsonAsync(response)).GetProperty("error").GetString());
+    }
+
+    /* ---------- create ---------- */
+
+    [Fact]
+    public async Task CreateItem_Anonymous_Returns401()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Post, PrivateItemFixture.ItemsApi, body: fixture.ValidBody(isPublic: true));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateItem_MissingTargetAudience_Returns400()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Post, PrivateItemFixture.ItemsApi, fixture.OwnerToken, new
+        {
+            contentId = "any",
+            descriptions = Array.Empty<object>(),
+            texts = Array.Empty<object>(),
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateItem_WithoutPrice_IsFree()
+    {
+        var id = await fixture.CreateItemAsync(fixture.OwnerToken, isPublic: false);
+        try
+        {
+            using var response = await Api.SendAsync(HttpMethod.Get, ItemUrl(id), fixture.OwnerToken);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var item = (await Api.ReadJsonAsync(response)).GetProperty("item");
+            Assert.False(item.GetProperty("isPublic").GetBoolean());
+            Assert.Equal(0, item.GetProperty("price").GetInt32());
+        }
+        finally
+        {
+            await PrivateItemFixture.DeleteItemAsync(fixture.OwnerToken, id);
+        }
+    }
+
+    /* ---------- list ---------- */
+
+    private static async Task<List<string?>> ListItemIdsAsync(string? token)
+    {
+        using var response = await Api.SendAsync(HttpMethod.Get, PrivateItemFixture.ItemsApi, token);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await Api.ReadJsonAsync(response)).GetProperty("items").EnumerateArray()
+            .Select(i => i.GetProperty("_id").GetString())
+            .ToList();
+    }
+
+    [Fact]
+    public async Task ListItems_OwnerSeesOwnPrivateItem()
+    {
+        Assert.Contains(fixture.PrivateItemId, await ListItemIdsAsync(fixture.OwnerToken));
+    }
+
+    [Fact]
+    public async Task ListItems_AnonymousAndOthersDoNotSeePrivateItem()
+    {
+        Assert.DoesNotContain(fixture.PrivateItemId, await ListItemIdsAsync(null));
+        Assert.DoesNotContain(fixture.PrivateItemId, await ListItemIdsAsync(fixture.OtherToken));
+    }
+
+    /* ---------- update ---------- */
+
+    [Fact]
+    public async Task UpdateItem_AsOwner_ChangesOnlySentFields()
+    {
+        var id = await fixture.CreateItemAsync(fixture.OwnerToken, isPublic: false);
+        try
+        {
+            using var response = await Api.SendAsync(HttpMethod.Put, ItemUrl(id), fixture.OwnerToken, new { price = 5 });
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var item = (await Api.ReadJsonAsync(response)).GetProperty("item");
+            Assert.Equal(5, item.GetProperty("price").GetInt32());
+            Assert.Equal("general", item.GetProperty("targetAudience").GetString());
+        }
+        finally
+        {
+            await PrivateItemFixture.DeleteItemAsync(fixture.OwnerToken, id);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateItem_AsOtherUser_Returns403()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Put, ItemUrl(fixture.PrivateItemId), fixture.OtherToken, new { price = 5 });
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateItem_Anonymous_Returns401()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Put, ItemUrl(fixture.PrivateItemId), body: new { price = 5 });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateItem_NegativePrice_Returns400()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Put, ItemUrl(fixture.PrivateItemId), fixture.OwnerToken, new { price = -1 });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    /* ---------- delete ---------- */
+
+    [Fact]
+    public async Task DeleteItem_AsOtherUser_Returns403()
+    {
+        using var response = await Api.SendAsync(HttpMethod.Delete, ItemUrl(fixture.PrivateItemId), fixture.OtherToken);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

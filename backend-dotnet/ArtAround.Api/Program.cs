@@ -6,10 +6,13 @@ using ArtAround.Api.Domain;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.NameTranslation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using ArtAround.Api.Authorization;
 using ArtAround.Api.Dtos;
+using ArtAround.Api.Infrastructure;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -35,18 +38,27 @@ builder.Services.AddControllers(options => options.Filters.Add(new AuthorizeFilt
                     JsonNamingPolicy.CamelCase.ConvertName(entry.Key.Replace("$.", "")),
                     entry.Value!.Errors[0].ErrorMessage))
                 .ToList();
-            return new BadRequestObjectResult(new ValidationErrorResponse(details));
+            return ApiProblem.Validation(details);
         };
     });
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IMuseumRepository, EfMuseumRepository>();
-builder.Services.AddProblemDetails();
+// Framework errors (401, 404, 500) carry "error" too: the frontends read it.
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+    context.ProblemDetails.Extensions.TryAdd("error", context.ProblemDetails.Title));
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 var contentTypeTranslator = new NpgsqlNullNameTranslator();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default"), npgsql => npgsql
             .MapEnum<ContentType>("content_type", nameTranslator: contentTypeTranslator)
             .MapEnum<PoiType>("poi_type")
-            .MapEnum<Language>("language"))
+            .MapEnum<Language>("language")
+            .MapEnum<Tone>("tone")
+            .MapEnum<License>("license")
+            .MapEnum<VisitType>("visit_type")
+            .MapEnum<VisitLength>("visit_length")
+            .MapEnum<BlockType>("block_type")
+            .MapEnum<AnswerType>("answer_type"))
         .UseSnakeCaseNamingConvention());
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton<TokenService>();
@@ -64,7 +76,9 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationHandler, OwnerHandler>();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(OwnerHandler.Policy, policy => policy.AddRequirements(new OwnerRequirement()));
 
 var app = builder.Build();
 

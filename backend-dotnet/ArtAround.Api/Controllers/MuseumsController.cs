@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ArtAround.Api.Repositories;
 using ArtAround.Api.Dtos;
 using ArtAround.Api.Domain;
+using ArtAround.Api.Infrastructure;
 
 namespace ArtAround.Api.Controllers;
 
@@ -26,7 +27,7 @@ public class MuseumsController(IMuseumRepository repo) : ControllerBase
     {
         var museum = await repo.FindAsync(idOrSlug);
         return museum is null
-            ? NotFound(new { error = NotFoundMessage })
+            ? ApiProblem.NotFound(NotFoundMessage)
             : Ok(new { museum = MuseumDto.From(museum) });
     }
 
@@ -41,14 +42,23 @@ public class MuseumsController(IMuseumRepository repo) : ControllerBase
             var type = values[0];
             if (values.Count > 1 || type is null || !Enum.GetNames<ContentType>().Contains(type))
             {
-                return BadRequest(new { error = "Invalid content type" });
+                return ApiProblem.BadRequest("Invalid content type");
             }
             filter = Enum.Parse<ContentType>(type);
         }
 
         var contents = await repo.ListContentsAsync(idOrSlug, filter);
         return contents is null
-            ? NotFound(new { error = NotFoundMessage })
+            ? ApiProblem.NotFound(NotFoundMessage)
             : Ok(new { contents = contents.Select(ContentDto.From).ToList() });
+    }
+
+    [HttpGet("{idOrSlug}/visits")]
+    public async Task<IActionResult> GetVisits(string idOrSlug)
+    {
+        var visits = await repo.ListVisitsAsync(idOrSlug, User.FindId());
+        return visits is null
+            ? ApiProblem.NotFound(NotFoundMessage)
+            : Ok(new { visits = visits.Select(VisitSummaryDto.From).ToList() });
     }
 }

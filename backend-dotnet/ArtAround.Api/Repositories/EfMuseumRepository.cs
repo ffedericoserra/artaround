@@ -43,6 +43,18 @@ public class EfMuseumRepository(AppDbContext db) : IMuseumRepository
             .ToListAsync();
     }
 
+    public async Task<IReadOnlyList<Visit>?> ListVisitsAsync(string idOrSlug, long? viewerId)
+    {
+        var museumId = await FindIdAsync(idOrSlug);
+        if (museumId is null) return null;
+
+        return await db.Visits.AsNoTracking()
+            .Where(v => v.MuseumId == museumId && (v.IsPublic || v.CreatorId == viewerId))
+            .WithSummary()
+            .OrderByDescending(v => v.CreatedAt)
+            .ToListAsync();
+    }
+
     private Task<long?> FindIdAsync(string idOrSlug)
     {
         var query = long.TryParse(idOrSlug, out var id)
