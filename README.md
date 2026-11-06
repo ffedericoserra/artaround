@@ -28,14 +28,14 @@ The first start creates the database and fills it with two museums and demo data
 docker compose down -v
 ```
 
-## Where things are
+## Repo Structure
 
 ```
 backend/ArtAround.Api/
   Controllers/      HTTP endpoints: auth, museums, items, visits, sessions
   Services/         PurchaseService: the transaction that moves credits
   Hubs/             SessionHub: SignalR, broadcast only
-  Authorization/    The "you own this" policy
+  Authorization/    'Owning' policies
   Domain/           EF entities
   Dtos/             JSON shapes and request validation
   Data/             DbContext, table mappings, migrations
@@ -52,21 +52,6 @@ uploads/            Images
 
 C# / ASP.NET Core 10 with controllers, PostgreSQL 17, EF Core, SignalR, JWT, xUnit, Docker. The frontends are vanilla JS and React 18.
 
-## Design decisions
-
-**Purchases can't overspend or deadlock.** Buying locks the buyer and creator rows with `SELECT ... FOR UPDATE`, always in id order, inside one transaction. A second purchase by the same buyer waits, then sees the updated balance. A `CHECK (wallet_balance >= 0)` is the last line of defence. Saving a visit and paying for its items share one transaction, so neither happens without the other.
-
-**The database has the final word on races.** Registering inserts and catches the unique violation, because checking first would leave a gap between the check and the insert. Wallet recharges add inside one `UPDATE`. Items, visits and sessions use Postgres's `xmin` column for optimistic concurrency, so a conflicting save gets a 409.
-
-**Nested data is relational.** The app started on MongoDB with embedded arrays. They are now child tables with foreign keys, so an item used by a visit can't be deleted. Question options are a `text[]`, because they are only ever read as an ordered list.
-
-**Authorization is deny by default.** A global filter requires a token on every action unless it says `[AllowAnonymous]`. Ownership is one resource-based policy, and answer keys are removed from responses for everyone but the host or author.
-
-**Real-time is broadcast only.** Every change goes through REST, then SignalR tells the room. Ownership and validation rules live in one place.
-
-**One error shape.** Every failure is ProblemDetails plus an `error` field, and `details` for validation.
-
-**Reads avoid row explosions.** Loading several collections uses split queries, and lists avoid per-row queries.
 
 ## Development
 
@@ -104,6 +89,3 @@ dotnet test contract-tests/ArtAround.ContractTests
 
 They exercise the API over real HTTP and SignalR, including concurrent purchases, recharges and saves. CI runs them on every push against the full Docker setup.
 
-## How it was built
-
-The first version was a university team project with a Node and MongoDB backend. This backend is a rewrite in .NET and PostgreSQL, made to learn the stack. I made the design decisions and built it with coding agents, which wrote much of the code. The original API contract was captured as tests first, then used to verify the rewrite.
